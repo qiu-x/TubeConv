@@ -76,7 +76,7 @@ html, body {
 }
 
 #video {
-	display: inline-block;
+	display: none;
 	background: #eee;
 	position: relative;
 	width: 100%;
