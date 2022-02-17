@@ -7,6 +7,8 @@ html, body {
 	padding:0;
 }
 
+.template { display: none; visibility: hidden; }
+
 #main-view {
 	top: 0px;
 	margin-left: auto;
@@ -79,7 +81,7 @@ html, body {
 	transform: translateY(-50%);
 }
 
-#video {
+.video {
 	display: none;
 	background: #eee;
 	position: relative;
@@ -89,15 +91,16 @@ html, body {
 	margin-top: 20px;
 	opacity: 0;
 	visibility: hidden;
+	transition: left 0s, visibility 0s, opacity 0.8s;
 
 }
-#video.showed {
+.video.showed {
 	visibility: visible;
 	transition: left 0s, visibility 0s, opacity 0.8s;
 	opacity: 1;
 }
 
-#video #thumb {
+.video .thumb {
 	object-fit: cover;
 	padding: 10px; 
 	font-size: 17px;
@@ -108,7 +111,7 @@ html, body {
 	margin: 0px;
 }
 
-#video #video-info {
+.video .video-info {
 	float: left;
 	color: black;
 	max-width: 45%;
@@ -122,7 +125,7 @@ html, body {
 	transform: translateY(-50%);
 }
 
-#video #download-button {
+.video .download-button {
 	margin: 0px;
 	float: right;
 	width: 80px;
@@ -135,7 +138,7 @@ html, body {
 	text-align: center;
 }
 
-#video #download-button img {
+.video .download-button img {
 	margin: 0;
 	position: relative;
 	top: 50%;
@@ -143,6 +146,6 @@ html, body {
 	transform: translateY(-50%) scale(65%);
 }
 
-#video #download-button:hover {
+.video .download-button:hover {
 	filter: brightness(90%);
 }
