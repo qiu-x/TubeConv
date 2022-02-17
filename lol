@@ -20,13 +20,13 @@ RESP:
         "title": "Crab Rave", 
         "author": "Noisestorm", 
         "link": "https://youtube.com/theurl", 
-        "duration": "3:15"
+        "thumbnail": "https://linktothumbnail"
     },
     {
         "title": "Crab Rave - Rap God", 
         "author": "Noisestorm", 
         "link": "https://youtube.com/theurl", 
-        "duration": "3:15"
+        "thumbnail": "https://linktothumbnail"
     }
     ...
     ]

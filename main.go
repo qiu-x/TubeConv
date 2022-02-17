@@ -12,11 +12,12 @@ type Request_type struct {
 
 func main(){
 	checkType := http.HandlerFunc(check_request_type)
-	http.Handle("/req", checkType)
+	http.Handle("/", checkType)
 	http.ListenAndServe(":8080", nil)
 }
 
 func check_request_type(w http.ResponseWriter, r *http.Request){
+	http.ServeFile(w, r, r.URL.Path[1:])
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {err_handle(err)}
 	var req_type Request_type
