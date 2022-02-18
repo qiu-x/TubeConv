@@ -29,20 +29,26 @@ async function moveSearch() {
 	for (let i = 0; i < vids.length; i++) {
 		vids[i].style.display = "inline-block";
 	}
-	await sleep(700);
-	for (let i = 0; i < vids.length; i++) {
-		vids[i].classList.add("showed");
-	}
+	search.addEventListener("transitionend", () => {
+		for (let i = 0; i < vids.length; i++) {
+			vids[i].classList.add("showed");
+		}
+	});
 }
 
 async function clearSearch() {
 	vids = document.getElementsByClassName("video");
+	if (!vids.item(0)) {
+		return;
+	}
 	main_view = document.getElementById("main-view");
 	for (let i = 0; i < vids.length; i++) {
 		vids[i].style.opacity = 0;
 	}
 	await sleep(700);
-	Array.from(vids).map(x => x.remove());
+	// vids.item(0).addEventListener("transitionend", () => {
+		// Array.from(vids).map(x => x.remove());
+	// });
 }
 
 async function checkLink(txt) {
