@@ -15,6 +15,22 @@ function log(text) {
 	}
 }
 
+function spinner(show, func) {
+	let spinner = document.getElementById("spinner");
+	if (show) {
+		spinner.style.display = "inline-block";
+		window.setTimeout(function(){
+			spinner.style.opacity = 1;
+		},0);
+	} else {
+		spinner.style.opacity = 0;
+		spinner.addEventListener("transitionend", () => {
+			spinner.style.display = "none";
+			if (func) func();
+		});
+	}
+}
+
 async function searchFunc() {
 	await clearResoult();
 	txt = document.getElementById("search-input").value;
@@ -31,13 +47,12 @@ async function showResoult() {
 	for (let i = 0; i < vids.length; i++) {
 		vids[i].style.display = "inline-block";
 	}
-	let show = () => {
+	let show = () => { spinner(false, () => {
 		for (let i = 0; i < vids.length; i++) {
 			vids[i].style.visibility = "visible";
 			vids[i].style.opacity = 1;
-
 		}
-	}
+	})}
 	if (!showResoult.transformed) {
 		search.addEventListener("transitionend", show);
 	} else {
@@ -49,6 +64,7 @@ async function showResoult() {
 async function clearResoult() {
 	let vids = document.getElementsByClassName("video");
 	if (!vids.item(0)) {
+		spinner(true);
 		return;
 	}
 	let main_view = document.getElementById("main-view");
@@ -61,6 +77,7 @@ async function clearResoult() {
 		arr.map(x => x.remove())
 		console.log(arr)
 		console.log(Date.now() - now);
+		spinner(true);
 	});
 }
 
