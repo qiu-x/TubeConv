@@ -95,12 +95,6 @@ html, body {
 
 }
 
-.video.showed {
-	visibility: visible;
-	transition: left 0s, visibility 0s, opacity 0.8s;
-	opacity: 1;
-}
-
 .video .thumb {
 	object-fit: cover;
 	padding: 10px; 

@@ -7,7 +7,7 @@ function post(url, data) {
 }
 
 function log(text) {
-	var caller = arguments.callee.caller
+	let caller = arguments.callee.caller
 	if (caller != null) {
 		console.log(caller.name.toString() + ": " + text)
 	} else {
@@ -16,39 +16,52 @@ function log(text) {
 }
 
 async function searchFunc() {
-	await clearSearch();
+	await clearResoult();
 	txt = document.getElementById("search-input").value;
 	await checkLink(txt);
-	await moveSearch();
+	await showResoult();
 }
 
-async function moveSearch() {
-	search = document.getElementById("search");
-	search.style.transform = 'translateY(-100%)';
-	vids = document.getElementsByClassName("video");
+async function showResoult() {
+	let search = document.getElementById("search");
+	if (!showResoult.transformed) {
+		search.style.transform = 'translateY(-100%)';
+	}
+	let vids = document.getElementsByClassName("video");
 	for (let i = 0; i < vids.length; i++) {
 		vids[i].style.display = "inline-block";
 	}
-	search.addEventListener("transitionend", () => {
+	let show = () => {
 		for (let i = 0; i < vids.length; i++) {
-			vids[i].classList.add("showed");
+			vids[i].style.visibility = "visible";
+			vids[i].style.opacity = 1;
+
 		}
-	});
+	}
+	if (!showResoult.transformed) {
+		search.addEventListener("transitionend", show);
+	} else {
+		vids.item(0).addEventListener("transitionend", show);
+	}
+	showResoult.transformed = true;
 }
 
-async function clearSearch() {
-	vids = document.getElementsByClassName("video");
+async function clearResoult() {
+	let vids = document.getElementsByClassName("video");
 	if (!vids.item(0)) {
 		return;
 	}
-	main_view = document.getElementById("main-view");
+	let main_view = document.getElementById("main-view");
 	for (let i = 0; i < vids.length; i++) {
 		vids[i].style.opacity = 0;
 	}
-	await sleep(700);
-	// vids.item(0).addEventListener("transitionend", () => {
-		// Array.from(vids).map(x => x.remove());
-	// });
+	let arr = Array.from(vids);
+	var now = Date.now();
+	vids.item(0).addEventListener("transitionend", () => {
+		arr.map(x => x.remove())
+		console.log(arr)
+		console.log(Date.now() - now);
+	});
 }
 
 async function checkLink(txt) {
@@ -84,7 +97,7 @@ async function queryVideo(title) {
 		vid.id = "video";
 		vid.classList.remove("template");
 		vid.classList.add("video");
-		var san_element = document.createElement('div');
+		let san_element = document.createElement('div');
 		san_element.innerText = json_videos[i].title;
 		vid.getElementsByClassName("video-info").item(0).innerHTML = san_element.innerHTML;
 		vid.getElementsByClassName("video-info").item(0).innerHTML += '</br>';
@@ -95,6 +108,5 @@ async function queryVideo(title) {
 		dl_button = vid.getElementsByClassName("download-button").item(0);
 		// dl_button.onclick = () => {showVideoInfo(json_videos[i].link);};
 		document.getElementById("main-view").appendChild(vid);
-		console.log(vid);
 	}
 }
