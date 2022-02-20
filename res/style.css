@@ -18,7 +18,11 @@ html, body {
 	width: 80%;
 	max-width: 800px;
 }
-
+@media (max-width: 730px) {
+	#main-view {
+		width: 95%;
+	}
+}
 #search {
 	display: inline-block;
 	border-color: #d00;
@@ -95,6 +99,7 @@ html, body {
 }
 
 .video .thumb {
+	display: inline-block;
 	object-fit: cover;
 	padding: 10px; 
 	font-size: 17px;
@@ -106,6 +111,7 @@ html, body {
 }
 
 .video .video-info {
+	display: inline-block;
 	float: left;
 	color: black;
 	max-width: 45%;
@@ -120,6 +126,7 @@ html, body {
 }
 
 .video .download-button {
+	display: inline-block;
 	margin: 0px;
 	float: right;
 	width: 80px;
@@ -142,6 +149,48 @@ html, body {
 
 .video .download-button:hover {
 	filter: brightness(90%);
+}
+
+@media (max-width: 610px) {
+	.video {
+		height: 120px;
+	}
+	.video .video-info {
+		font-size: 12px;
+		max-width: 40%;
+	}
+	.video .download-button {
+		width: 45px;
+	}
+}
+
+@media (max-width: 387px) {
+	.video {
+		height: 290px;
+		text-align: center;
+		padding-top: 0px;
+		margin-top: 40px;
+	}
+	.video .thumb {
+		float: none;
+		width: 100%;
+		padding: 0px;
+		height: 70%;
+	}
+	.video .video-info {
+		font-size: 12px;
+		max-width: 100%;
+		padding-bottom: 10px;
+		padding-top: 10px;
+		margin-left: 5px;
+		top: 0%;
+		-ms-transform: none;
+		transform: none;
+	}
+	.video .download-button {
+		height: 40px;
+		width: 100%;
+	}
 }
 
 .loader {
