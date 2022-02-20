@@ -41,11 +41,12 @@ async function searchFunc() {
 async function showResoult() {
 	let search = document.getElementById("search");
 	if (!showResoult.transformed) {
-		search.style.transform = 'translateY(-100%)';
+		search.style.transition = "margin-top 1s";
+		search.style.marginTop = 0;
 	}
 	let vids = document.getElementsByClassName("video");
 	for (let i = 0; i < vids.length; i++) {
-		vids[i].style.display = "inline-block";
+		vids[i].style.display = "flex";
 	}
 	let show = () => { spinner(false, () => {
 		for (let i = 0; i < vids.length; i++) {

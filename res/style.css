@@ -28,18 +28,29 @@ html, body {
 	border-color: #d00;
 	position: relative;
 	width: 100%;
-	height: 25%;
-	top: 30%;
+	height: auto;
+	margin-top: 30vh;
+	margin-bottom: 0px;
 	text-align: center;
-	transition: transform 1s;
+}
+
+#search img {
+	height: 5%;
 }
 
 #logo {
-	height: 50%;
+	display: inline-block;
+	width: 60%;
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -webkit-optimize-contrast;
 	image-rendering: crisp-edges;
 	-ms-interpolation-mode: nearest-neighbor;
+}
+
+@media (max-height: 330px) {
+	#logo {
+		width: 90vh;
+	}
 }
 
 #search-box {
@@ -95,11 +106,13 @@ html, body {
 	margin-top: 20px;
 	opacity: 0;
 	visibility: hidden;
+	overflow: hidden;
 	transition: left 0s, visibility 0s, opacity 0.8s;
 }
 
 .video .thumb {
-	display: inline-block;
+	flex-grow: 0;
+	flex-shrink: 0;
 	object-fit: cover;
 	padding: 10px; 
 	font-size: 17px;
@@ -111,25 +124,24 @@ html, body {
 }
 
 .video .video-info {
-	display: inline-block;
+	flex: 1;
 	float: left;
 	color: black;
-	max-width: 45%;
 	font-size: 17px;
 	cursor: pointer;
 	text-align: left;
 	margin: 0;
 	position: relative;
-	top: 50%;
-	-ms-transform: translateY(-50%);
-	transform: translateY(-50%);
+	padding-right: 10px;
+	top: 22%;
 }
 
 .video .download-button {
-	display: inline-block;
+	flex-grow: 0;
+	flex-shrink: 0;
 	margin: 0px;
 	float: right;
-	width: 80px;
+	width: 60px;
 	padding: 0px;
 	background: #d00;
 	color: white;
@@ -155,9 +167,11 @@ html, body {
 	.video {
 		height: 120px;
 	}
+	.video .thumb {
+		padding: 6px;
+	}
 	.video .video-info {
 		font-size: 12px;
-		max-width: 40%;
 	}
 	.video .download-button {
 		width: 45px;
@@ -166,18 +180,21 @@ html, body {
 
 @media (max-width: 387px) {
 	.video {
+		display: inline-block !important;
 		height: 290px;
 		text-align: center;
 		padding-top: 0px;
-		margin-top: 40px;
+		height: auto;
 	}
 	.video .thumb {
+		display: inline-block;
 		float: none;
 		width: 100%;
 		padding: 0px;
 		height: 70%;
 	}
 	.video .video-info {
+		display: inline-block;
 		font-size: 12px;
 		max-width: 100%;
 		padding-bottom: 10px;
@@ -188,6 +205,7 @@ html, body {
 		transform: none;
 	}
 	.video .download-button {
+		display: inline-block;
 		height: 40px;
 		width: 100%;
 	}
@@ -197,9 +215,10 @@ html, body {
 	display: none;
 	opacity: 0;
 	margin: auto;
+	margin-top: 60px;
 	border: 10px solid #EAF0F6;
 	border-radius: 50%;
-	border-top: 10px solid #d00; /*#FF7A59;*/
+	border-top: 10px solid #d00;
 	width: 10vh;
 	height: 10vh;
 	animation: spinner 4s linear infinite;
@@ -211,3 +230,4 @@ html, body {
 @keyframes spinner {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }
+}
