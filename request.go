@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -116,6 +117,57 @@ func query_request(w http.ResponseWriter, body []byte) {
 		err_handle(err)
 	}
 	w.Write(videos_json)
+}
+
+func videoinfo_request(w http.ResponseWriter, body []byte) {
+	videoinfo_req := struct {
+		Request string
+		Link    string
+	}{}
+	json.Unmarshal(body, &videoinfo_req)
+
+	output, err := exec.Command("yt-dlp", "-J", videoinfo_req.Link).Output()
+	if err != nil {
+		err_handle(err)
+	}
+	var output_json map[string]interface{}
+	json.Unmarshal(output, &output_json)
+	formats := output_json["formats"].([]interface{})
+
+	type video_info struct {
+		Video_quality    []string `json:"video_quality"`
+		Audio_quality    []string `json:"audio_quality"`
+	}
+
+	var vid_info video_info
+	var format_exist = make(map[string]int)
+	for _, v := range formats {
+		if v.(map[string]interface{})["format_note"].(string) == "storyboard" {
+			continue
+		}
+		_, exist := format_exist[v.(map[string]interface{})["format_note"].(string)]
+		if exist {
+			continue
+		}
+		format_exist[v.(map[string]interface{})["format_note"].(string)] = 0
+		if v.(map[string]interface{})["resolution"].(string) == "audio only" {
+			format_exist[v.(map[string]interface{})["format_note"].(string)] = 0
+			vid_info.Audio_quality = append(vid_info.Audio_quality, v.
+			(map[string]interface{})["format_note"].(string))
+		}else {
+			format_exist[v.(map[string]interface{})["format_note"].(string)] = 0
+			vid_info.Video_quality = append(vid_info.Video_quality, v.
+			(map[string]interface{})["format_note"].(string))
+		}
+	}
+	vid_info.Audio_quality = append(vid_info.Audio_quality, "none")
+	vid_info.Video_quality = append(vid_info.Video_quality, "none")
+
+	vid_info_json, err := json.Marshal(vid_info)
+	if err != nil {
+		err_handle(err)
+	}
+	w.Write(vid_info_json)
 }
 
 //func query_request_old(w http.ResponseWriter, body []byte) {

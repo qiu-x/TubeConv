@@ -57,7 +57,9 @@ func check_request_type(w http.ResponseWriter, r *http.Request) {
 
 	if req_type.Request == "check-link" {
 		checklink_request(w, body)
-	} else if req_type.Request == "query" {
+	}else if req_type.Request == "query" {
 		query_request(w, body)
+	}else if req_type.Request == "video-info" {
+		videoinfo_request(w, body)
 	}
 }
