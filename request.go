@@ -5,20 +5,19 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"os/exec"
 	"strings"
+	"strconv"
+	"io"
+	"math/rand"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	//"google.golang.org/api/googleapi/transport"
-	//"google.golang.org/api/youtube/v3"
+	"github.com/gorilla/mux"
 )
-
-const developerKey = ""
 
 func err_handle(err error) {
 	log.Println(err)
-	os.Exit(1)
 }
 
 func checklink_request(w http.ResponseWriter, body []byte) {
@@ -136,7 +135,7 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 
 	type video_info struct {
 		Video_quality    []string `json:"video_quality"`
-		Audio_quality    []string `json:"audio_quality"`
+		Audio_quality    []float64 `json:"audio_quality"`
 	}
 
 	var vid_info video_info
@@ -149,18 +148,17 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 		if exist {
 			continue
 		}
-		format_exist[v.(map[string]interface{})["format_note"].(string)] = 0
+
 		if v.(map[string]interface{})["resolution"].(string) == "audio only" {
-			format_exist[v.(map[string]interface{})["format_note"].(string)] = 0
 			vid_info.Audio_quality = append(vid_info.Audio_quality, v.
-			(map[string]interface{})["format_note"].(string))
+			(map[string]interface{})["abr"].(float64))
 		}else {
 			format_exist[v.(map[string]interface{})["format_note"].(string)] = 0
 			vid_info.Video_quality = append(vid_info.Video_quality, v.
 			(map[string]interface{})["format_note"].(string))
 		}
 	}
-	vid_info.Audio_quality = append(vid_info.Audio_quality, "none")
+	vid_info.Audio_quality = append(vid_info.Audio_quality, 0)
 	vid_info.Video_quality = append(vid_info.Video_quality, "none")
 
 	vid_info_json, err := json.Marshal(vid_info)
@@ -170,58 +168,78 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 	w.Write(vid_info_json)
 }
 
-//func query_request_old(w http.ResponseWriter, body []byte) {
-//	query_req := struct {
-//		Request string
-//		Text    string
-//	}{}
-//	json.Unmarshal(body, &query_req)
-//	log.Println(query_req)
-//
-//	client := &http.Client{
-//		Transport: &transport.APIKey{Key: developerKey},
-//	}
-//	service, err := youtube.New(client)
-//	if err != nil {
-//		err_handle(err)
-//	}
-//
-//	// Youtube API use
-//	var look_by []string
-//	look_by = append(look_by, "snippet")
-//
-//	call := service.Search.List(look_by).Q(query_req.Text).MaxResults(25)
-//	result, err := call.Do()
-//	if err != nil {
-//		err_handle(err)
-//	}
-//
-//	// Create and send respond
-//	w.Header().Set("Content-Type", "application/json")
-//	//var videos [5][4]string
-//
-//	type video struct {
-//		Title     string `json:"title"`
-//		Author    string `json:"author"`
-//		Link      string `json:"link"`
-//		Thumbnail string `json:"thumbnail"`
-//	}
-//	var vids []video
-//
-//	for _, item := range result.Items {
-//		switch item.Id.Kind {
-//		case "youtube#video":
-//			vid := video{item.Snippet.Title, item.Snippet.ChannelTitle,
-//				"https://youtube.com/watch?v=" + item.Id.VideoId, item.Snippet.Thumbnails.High.Url}
-//			vids = append(vids, vid)
-//		}
-//	}
-//	videos := struct {
-//		Videos []video `json:"videos"`
-//	}{Videos: vids}
-//	videos_json, err := json.Marshal(videos)
-//	if err != nil {
-//		err_handle(err)
-//	}
-//	w.Write(videos_json)
-//}
+func download_request(w http.ResponseWriter, body []byte) {
+	download_req := struct {
+		Request 	   string
+		Link    	   string
+		Video_quality  string `json:"video-quality"`
+		Audio_quality  float64 `json:"audio-quality"`
+		Format		   string
+	}{}
+	json.Unmarshal(body, &download_req)
+	var download *exec.Cmd
+	var ffmpeg *exec.Cmd
+	var r io.ReadCloser
+	var err error
+
+	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" {
+		download = exec.Command("yt-dlp", "-f", "bestvideo[ext=" + download_req.Format + "][height<=" + 
+		download_req.Video_quality + "]+bestaudio[ext=m4a][abr<=" + 
+		strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]",
+		"-o", "-", download_req.Link)
+		r, err = download.StdoutPipe()
+	}
+
+	if download_req.Audio_quality != 0 && download_req.Video_quality == "none" {
+		download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<=" + 
+		strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
+		if download_req.Format != "mp4" {
+			ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "mp3", "-")
+			ffmpeg.Stdin, _ = download.StdoutPipe()
+			r, err = ffmpeg.StdoutPipe()
+		}else{
+			r, err = download.StdoutPipe()
+		}
+	}
+
+	if download_req.Audio_quality == 0 && download_req.Video_quality != "none" {
+		download = exec.Command("yt-dlp", "-f", "bestvideo[ext=" + download_req.Format + "][height<=" + 
+		download_req.Video_quality + "]", "-o", "-", download_req.Link)
+		r, err = download.StdoutPipe()
+	}
+	if err != nil {
+		err_handle(err)
+	}
+	download.Start()
+	if ffmpeg != nil {
+		ffmpeg.Start()
+	}
+
+	var seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))	  
+	const charset = "abcdefghijklmnopqrstuvwxyz" +
+  	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	id := make([]byte, 25)
+  	for i := range id {
+    	id[i] = charset[seededRand.Intn(len(charset))]
+  	}
+	log.Println(string(id))
+	Mapa.Mutex.Lock()
+	Mapa.Map[string(id)] = Download_data{download_req.Format, r}
+	Mapa.Mutex.Unlock()
+}
+
+func download_link_generator(w http.ResponseWriter, r *http.Request) {
+	Mapa.Mutex.Lock()
+	defer Mapa.Mutex.Unlock()
+	vars := mux.Vars(r)
+	_, exist := Mapa.Map[vars["id"]]
+	if !exist {
+		http.NotFound(w,r)
+		return
+	}
+	w.Header().Set("content-disposition", "attachment; filename=example."+ Mapa.Map[vars["id"]].Format)
+	buffer := make([]byte, 1024)
+	io.CopyBuffer(w, Mapa.Map[vars["id"]].File, buffer)
+	delete(Mapa.Map, vars["id"])
+}

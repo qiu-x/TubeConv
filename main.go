@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 type Request_type struct {
@@ -37,10 +39,26 @@ func fileServerFilter(next http.Handler) http.Handler {
 	})
 }
 
+type SafeMap struct{
+	Mutex sync.Mutex
+	Map  map[string]Download_data
+}
+
+type Download_data struct {
+	Format string
+	File   io.Reader
+}
+
+var Mapa SafeMap
+
 func main() {
+	Mapa.Map = make(map[string]Download_data)
 	checkType := http.HandlerFunc(check_request_type)
+	router.HandleFunc("/res/icons/favicon-32x32.png", simpleHandler("res/icons/favicon-32x32.png"))
+	router.HandleFunc("/res/icons/favicon-16x16.png", simpleHandler("res/icons/favicon-16x16.png"))
 	router.HandleFunc("/", simpleHandler("html/index.html"))
 	router.HandleFunc("/req", checkType).Methods("POST")
+	router.HandleFunc("/download/{id}", download_link_generator)
 	http.Handle("/", router)
 	fs := http.FileServer(http.Dir("."))
 	http.Handle("/res/", fileServerFilter(fs))
@@ -61,5 +79,7 @@ func check_request_type(w http.ResponseWriter, r *http.Request) {
 		query_request(w, body)
 	}else if req_type.Request == "video-info" {
 		videoinfo_request(w, body)
+	}else if req_type.Request == "download" {
+		download_request(w, body)
 	}
 }
