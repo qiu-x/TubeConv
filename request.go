@@ -223,23 +223,41 @@ func download_request(w http.ResponseWriter, body []byte) {
   	for i := range id {
     	id[i] = charset[seededRand.Intn(len(charset))]
   	}
-	log.Println(string(id))
+
+	file_name, err := exec.Command("yt-dlp", "--get-filename", download_req.Link).Output()
+	if err != nil {
+		err_handle(err)
+	}
+	filename_arr := strings.Split(string(file_name), ".")
+	filename := strings.Join(filename_arr[:len(filename_arr) - 1], "") + "." + download_req.Format
+
+	
 	Mapa.Mutex.Lock()
-	Mapa.Map[string(id)] = Download_data{download_req.Format, r}
+	Mapa.Map[string(id)] = Download_data{filename, r}
 	Mapa.Mutex.Unlock()
+	down_link := struct{
+		File string `json:"file"`
+	}{
+		"/download/" + string(id),
+	}
+	down_link_json, err := json.Marshal(down_link)
+	if err != nil {
+		err_handle(err)
+	}
+	w.Write(down_link_json)
 }
 
-func download_link_generator(w http.ResponseWriter, r *http.Request) {
+func download_link_generator(w http.ResponseWriter, req *http.Request) {
 	Mapa.Mutex.Lock()
-	defer Mapa.Mutex.Unlock()
-	vars := mux.Vars(r)
-	_, exist := Mapa.Map[vars["id"]]
+	vars := mux.Vars(req)
+	r, exist := Mapa.Map[vars["id"]]
 	if !exist {
-		http.NotFound(w,r)
+		http.NotFound(w,req)
 		return
 	}
-	w.Header().Set("content-disposition", "attachment; filename=example."+ Mapa.Map[vars["id"]].Format)
-	buffer := make([]byte, 1024)
-	io.CopyBuffer(w, Mapa.Map[vars["id"]].File, buffer)
 	delete(Mapa.Map, vars["id"])
+	Mapa.Mutex.Unlock()
+	w.Header().Set("content-disposition", "attachment; filename="+r.Name)
+	buffer := make([]byte, 1024)
+	io.CopyBuffer(w, r.File, buffer)
 }

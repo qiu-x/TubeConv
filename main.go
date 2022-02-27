@@ -45,7 +45,7 @@ type SafeMap struct{
 }
 
 type Download_data struct {
-	Format string
+	Name   string
 	File   io.Reader
 }
 
@@ -54,8 +54,6 @@ var Mapa SafeMap
 func main() {
 	Mapa.Map = make(map[string]Download_data)
 	checkType := http.HandlerFunc(check_request_type)
-	router.HandleFunc("/res/icons/favicon-32x32.png", simpleHandler("res/icons/favicon-32x32.png"))
-	router.HandleFunc("/res/icons/favicon-16x16.png", simpleHandler("res/icons/favicon-16x16.png"))
 	router.HandleFunc("/", simpleHandler("html/index.html"))
 	router.HandleFunc("/req", checkType).Methods("POST")
 	router.HandleFunc("/download/{id}", download_link_generator)
