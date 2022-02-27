@@ -63,6 +63,17 @@ function makeLocalSpinner() {
 	return spn;
 }
 
+// Execute when the user releases the enter key
+document.getElementById("search-input").addEventListener("keydown", event => {
+  // Number 13 is the "Enter" key on the keyboard
+  if (event.keyCode === 13) {
+    // Cancel the default action, if needed
+    event.preventDefault();
+    // Trigger the same function as onclick
+    searchFunc()
+  }
+});
+
 async function searchFunc() {
 	await clearResoult();
 	txt = document.getElementById("search-input").value;
