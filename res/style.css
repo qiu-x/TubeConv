@@ -283,6 +283,11 @@ html, body {
 	.scrollmenu .item {
 		display: inline-block !important;
 	}
+	.resp-spinner {
+		top: 10px !important;
+		height: 6vh !important;
+		width: 6vh !important;
+	}
 }
 
 .loader {

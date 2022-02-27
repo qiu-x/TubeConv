@@ -31,6 +31,38 @@ function spinner(show, func) {
 	}
 }
 
+function makeLocalSpinner() {
+	let spn_clone = document.getElementById("spinner").cloneNode(true);
+	spn_clone.style.position = "absolute";
+	spn_clone.style.top = "0px";
+	spn_clone.style.marginTop = "0px";
+	spn_clone.style.marginLeft = "auto";
+	spn_clone.style.marginRight = "auto";
+	spn_clone.style.left = "0px";
+	spn_clone.style.right = "0px";
+	spn_clone.style.zIndex = 1;
+	spn_clone.classList.add("resp-spinner");
+	let spn = {
+		spinner: spn_clone,
+		show: function() {
+			let spi = this.spinner;
+			spi.style.display = "inline-block";
+			window.setTimeout(function(){
+				spi.style.opacity = 1;
+			},0);
+		},
+		hide: function(func) {
+			let spi = this.spinner;
+			spi.style.opacity = 0;
+			spi.addEventListener("transitionend", () => {
+				spi.style.display = "none";
+				if (func) func();
+			});
+		}
+	}
+	return spn;
+}
+
 async function searchFunc() {
 	await clearResoult();
 	txt = document.getElementById("search-input").value;
@@ -93,7 +125,7 @@ async function checkLink(txt) {
 		await queryVideo(txt);
 		break;
 	case "link":
-		// showVideoInfo(txt);
+		// videoInfo(txt);
 		break;
 	default:
 		log("bad response")
@@ -124,13 +156,30 @@ async function queryVideo(title) {
 		vid.getElementsByClassName("video-info").item(0).innerHTML += san_element.innerHTML;
 		vid.getElementsByClassName("thumb").item(0).src = json_videos[i].thumbnail;
 		dl_button = vid.getElementsByClassName("download-button").item(0);
-		dl_button.onclick = () => {showVideoInfo(i, json_videos[i].link);};
+		dl_button.onclick = () => {videoInfo(i, json_videos[i].link);};
 		document.getElementById("main-view").appendChild(vid);
 	}
 }
 
-let videoo
-async function showVideoInfo(index, link) {
+async function videoInfo(index, link) {
+	elem = document.getElementsByClassName("video").item(index);
+
+	// Animate background
+	bg = elem.getElementsByClassName("alt-bg").item(0)
+	bg.style.width = "100%";
+	dl_button = elem.getElementsByClassName("download-button").item(0);
+	dl_button.classList.add("final")
+	arrow = dl_button.getElementsByTagName("img").item(0);
+	arrow.classList.add("final");
+
+	info = elem.querySelector(".video-info")
+
+	// Make spinner
+	spn = makeLocalSpinner();
+	info.appendChild(spn.spinner);
+	bg.addEventListener("transitionend", () => spn.show());
+
+	// Send request
 	const resp = await post("/req", {
 		request: "video-info",
 		link: link
@@ -138,21 +187,20 @@ async function showVideoInfo(index, link) {
 	const json = await resp.json();
 	const template = document.getElementById("video-template");
 	const json_videos = json.videos;
-	console.log(json);
-	elem = document.getElementsByClassName("video").item(index);
-	videoo = elem;
-	bg = elem.getElementsByClassName("alt-bg").item(0)
-	bg.style.width = "100%";
-	dl_button = elem.getElementsByClassName("download-button").item(0);
-	dl_button.classList.add("final")
-	arrow = dl_button.getElementsByTagName("img").item(0);
-	arrow.classList.add("final");
-	info = elem.querySelector(".video-info")
-	old_h = getComputedStyle(info).height;
-	info.innerHTML = document.getElementById("video-info-temp").innerHTML;
-	info.style.height = old_h;
-	info.style.opacity = 0;
 
+	spn.hide(() => showInfo(info,json));
+}
+
+function showInfo(infoElem, json) {
+	// Store the current element height
+	old_h = getComputedStyle(infoElem).height;
+	infoElem.style.height = old_h;
+	// Load element template
+	infoElem.innerHTML = document.getElementById("video-info-temp").innerHTML;
+	// Restore the old height (makes the animation work)
+	infoElem.style.opacity = 0;
+
+	// Helper function for filling the menu items
 	assign_text = (menu, arr) => {
 		item_empty = menu.getElementsByClassName("item").item(0);
 		for (let i = 0; i < arr.length; i++) {
@@ -162,27 +210,26 @@ async function showVideoInfo(index, link) {
 		}
 		item_empty.remove();
 	}
+
+
+	// Fill the menus
 	menus = Array.from(elem.getElementsByClassName("scrollmenu"));
 	menu_info = [
 		json.video_quality,
 		json.audio_quality,
 		["mp4", "webm", "mp3"]
 	]
-
 	for (let i = 0; i < 3; i++) {
 		assign_text(menus[i], menu_info[i]);
 	}
-
-	bg.addEventListener("transitionend", () => {
-		info.style.opacity = 1;
-		// elem.querySelector(".video-info").style.display = "none";
-		info.classList.add("final");
-		console.log(info)
-		info.classList.add("showed");
-		window.setTimeout(function() {
-			for (let i = 0; i < menus.length; i++) {
-				menus[i].style.width = "30%";
-			}
-		},0);
-	});
+	window.setTimeout(function() {
+		infoElem.style.opacity = 1;
+		infoElem.classList.add("final");
+		infoElem.classList.add("showed");
+	},0);
+	window.setTimeout(function() {
+		for (let i = 0; i < menus.length; i++) {
+			menus[i].style.width = "30%";
+		}
+	},0);
 }
