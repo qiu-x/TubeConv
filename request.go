@@ -139,6 +139,9 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 	}
 
 	var vid_info video_info
+	vid_info.Audio_quality = append(vid_info.Audio_quality, 0)
+	vid_info.Video_quality = append(vid_info.Video_quality, "none")
+
 	var format_exist = make(map[string]int)
 	for _, v := range formats {
 		if v.(map[string]interface{})["format_note"].(string) == "storyboard" {
@@ -158,8 +161,6 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 			(map[string]interface{})["format_note"].(string))
 		}
 	}
-	vid_info.Audio_quality = append(vid_info.Audio_quality, 0)
-	vid_info.Video_quality = append(vid_info.Video_quality, "none")
 
 	vid_info_json, err := json.Marshal(vid_info)
 	if err != nil {
