@@ -6,6 +6,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/res/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/res/icons/favicon-16x16.png">
     <title>TubeConv</title>
+      <div style="display: none" id="video-info-temp">
+        <div class="scrollmenu">
+	        <div class="item"></div>
+        </div>
+        <div class="scrollmenu">
+	        <div class="item"></div>
+        </div>
+        <div class="scrollmenu">
+	        <div class="item"></div>
+        </div>
+      </div>
   </head>
   <body>
     <div id="main-view">
@@ -22,8 +33,9 @@
         <img class="thumb" src="res/thumb.jpg">
         <div class="video-info"></div>
         <div class="download-button">
-            <img src="res/arrow.svg" style="width: 65%; height: 65%; filter: invert(1);" id="dagger" />
+            <img src="res/arrow.svg" class="arrow" id="dagger"/>
         </div>
+        <div class="alt-bg"></div>
       </div>
       <div id="spinner" class="loader"></div>
     </div>

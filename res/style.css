@@ -107,20 +107,21 @@ html, body {
 	opacity: 0;
 	visibility: hidden;
 	overflow: hidden;
-	transition: left 0s, visibility 0s, opacity 0.8s;
+	transition: all 0.8s;
 }
 
 .video .thumb {
 	flex-grow: 0;
-	flex-shrink: 0;
+	flex-shrink: 1;
 	object-fit: cover;
 	padding: 10px; 
 	font-size: 17px;
 	border: 0px;
-	float: left;
+	/* float: left; */
 	width: auto;
 	height: 90%;
 	margin: 0px;
+	z-index: 1;
 }
 
 .video .video-info {
@@ -136,6 +137,18 @@ html, body {
 	top: 22%;
 }
 
+.video .video-info.final {
+	display: none;
+	opacity: 1;
+	top: 0%;
+	z-index: 1;
+	overflow: scroll;
+}
+
+.video .video-info.final.showed {
+	display: flex;
+}
+
 .video .download-button {
 	flex-grow: 0;
 	flex-shrink: 0;
@@ -149,6 +162,45 @@ html, body {
 	cursor: pointer;
 	height: 100%;
 	text-align: center;
+	transition: all 0.5s;
+}
+
+.video .download-button.final {
+	z-index: 2;
+	background: #f4f4f4;
+	transition: all 0.5s;
+}
+
+.arrow {
+	width: 65%;
+	height: 65%;
+	filter: invert(1);
+	transition: all 0.5s;
+}
+
+.arrow.final {
+	width: 65%;
+	height: 65%;
+	z-index: 3;
+	color: red;
+	filter: invert(1) brightness(0.5) sepia(1) saturate(10000%);
+	transition: all 0.5s;
+}
+
+.video .alt-bg {
+	right: 0px;
+	margin: 0px;
+	padding: 0px;
+	background: #d00;
+	color: white;
+	font-size: 17px;
+	cursor: pointer;
+	height: 100%;
+	text-align: center;
+	position: absolute;
+	z-index: 0;
+	width: 0%;
+	transition: all 1s;
 }
 
 .video .download-button img {
@@ -176,6 +228,9 @@ html, body {
 	.video .download-button {
 		width: 45px;
 	}
+	/* .scrollmenu { */
+		/* width: auto !important; */
+	/* } */
 }
 
 @media (max-width: 387px) {
@@ -208,6 +263,25 @@ html, body {
 		display: inline-block;
 		height: 40px;
 		width: 100%;
+		position: relative;
+	}
+	.video .video-info.final.showed {
+		display: block;
+		height: 123px !important;
+		transition: all 0.5s;
+	}
+	.scrollmenu {
+		display: block !important;
+		width: 95% !important;
+		margin: none !important;
+		margin-top: 3px !important;
+		margin-left: 1% !important;
+		overflow-x: scroll !important;
+		overflow-y: hidden !important;
+		height: auto !important;
+	}
+	.scrollmenu .item {
+		display: inline-block !important;
 	}
 }
 
@@ -224,10 +298,39 @@ html, body {
 	animation: spinner 4s linear infinite;
 	position: relative;
 	top:35%;
-	transition: left 0s, visibility 0s, opacity 0.8s;
+	transition: left 0s, visibility 0s, opacity 0.5s;
 }
 
 @keyframes spinner {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }
+}
+
+.scrollmenu .item {
+	display: block;
+	color: white;
+	text-align: center;
+	padding: 10px;
+	text-decoration: none;
+	width: auto;
+	font-size: 15px;
+}
+
+.scrollmenu .item:hover {
+	background-color: #C03A3A;
+}
+
+.scrollmenu {
+	flex-shrink: 1;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	white-space: nowrap;
+	background: #9C0000;
+	border-radius: 10px;
+	height: 85%;
+	width: 0%;
+	display: table-cell;
+	vertical-align: middle;
+	margin: auto;
+	transition: all 0.5s;
 }

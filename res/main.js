@@ -124,7 +124,65 @@ async function queryVideo(title) {
 		vid.getElementsByClassName("video-info").item(0).innerHTML += san_element.innerHTML;
 		vid.getElementsByClassName("thumb").item(0).src = json_videos[i].thumbnail;
 		dl_button = vid.getElementsByClassName("download-button").item(0);
-		// dl_button.onclick = () => {showVideoInfo(json_videos[i].link);};
+		dl_button.onclick = () => {showVideoInfo(i, json_videos[i].link);};
 		document.getElementById("main-view").appendChild(vid);
 	}
+}
+
+let videoo
+async function showVideoInfo(index, link) {
+	const resp = await post("/req", {
+		request: "video-info",
+		link: link
+	});
+	const json = await resp.json();
+	const template = document.getElementById("video-template");
+	const json_videos = json.videos;
+	console.log(json);
+	elem = document.getElementsByClassName("video").item(index);
+	videoo = elem;
+	bg = elem.getElementsByClassName("alt-bg").item(0)
+	bg.style.width = "100%";
+	dl_button = elem.getElementsByClassName("download-button").item(0);
+	dl_button.classList.add("final")
+	arrow = dl_button.getElementsByTagName("img").item(0);
+	arrow.classList.add("final");
+	info = elem.querySelector(".video-info")
+	old_h = getComputedStyle(info).height;
+	info.innerHTML = document.getElementById("video-info-temp").innerHTML;
+	info.style.height = old_h;
+	info.style.opacity = 0;
+
+	assign_text = (menu, arr) => {
+		item_empty = menu.getElementsByClassName("item").item(0);
+		for (let i = 0; i < arr.length; i++) {
+			item = item_empty.cloneNode(true);
+			item.innerText = arr[i];
+			menu.appendChild(item);
+		}
+		item_empty.remove();
+	}
+	menus = Array.from(elem.getElementsByClassName("scrollmenu"));
+	menu_info = [
+		json.video_quality,
+		json.audio_quality,
+		["mp4", "webm", "mp3"]
+	]
+
+	for (let i = 0; i < 3; i++) {
+		assign_text(menus[i], menu_info[i]);
+	}
+
+	bg.addEventListener("transitionend", () => {
+		info.style.opacity = 1;
+		// elem.querySelector(".video-info").style.display = "none";
+		info.classList.add("final");
+		console.log(info)
+		info.classList.add("showed");
+		window.setTimeout(function() {
+			for (let i = 0; i < menus.length; i++) {
+				menus[i].style.width = "30%";
+			}
+		},0);
+	});
 }
