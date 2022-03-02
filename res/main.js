@@ -169,6 +169,7 @@ async function queryVideo(title) {
 		vid.getElementsByClassName("thumb").item(0).src = json_videos[i].thumbnail;
 		dl_button = vid.getElementsByClassName("download-button").item(0);
 		dl_button.onclick = () => {videoInfo(i, json_videos[i].link);};
+		dl_button.id = json_videos[i].link;
 		document.getElementById("main-view").appendChild(vid);
 	}
 }
@@ -201,6 +202,16 @@ async function videoInfo(index, link) {
 	const json_videos = json.videos;
 
 	spn.hide(() => showInfo(info,json));
+
+	makeDownloadButton(elem);
+}
+
+function selItem(item) {
+	items = Array.from(item.parentNode.getElementsByClassName("item"));
+	for (let i = 0; i < items.length; i++) {
+		items[i].classList.remove("selected");
+	}
+	item.classList.add("selected")
 }
 
 function showInfo(infoElem, json) {
@@ -223,12 +234,11 @@ function showInfo(infoElem, json) {
 		item_empty.remove();
 	}
 
-
 	// Fill the menus
 	menus = Array.from(elem.getElementsByClassName("scrollmenu"));
 	menu_info = [
-		json.video_quality,
-		json.audio_quality,
+		json.video_quality.reverse(),
+		json.audio_quality.reverse(),
 		["mp4", "webm", "mp3"]
 	]
 	for (let i = 0; i < 3; i++) {
@@ -244,4 +254,38 @@ function showInfo(infoElem, json) {
 			menus[i].style.width = "30%";
 		}
 	},0);
+}
+
+async function makeDownloadButton(vidElem) {
+	dl_btn = vidElem.getElementsByClassName("download-button").item(0);
+	menus = Array.from(vidElem.getElementsByClassName("scrollmenu"));
+	dl_btn.onclick = () => {
+		console.log("hi");
+		downloadVideo(menus, dl_btn.id);
+	};
+}
+
+async function downloadVideo(menus, link) {
+	let getSel = (itm) => {
+		for (let i = 0; i < itm.length; i++) {
+			if (itm[i].classList.contains("selected")) {
+				return itm[i];
+			}
+		}
+		return itm[0];
+	};
+	vid_q = getSel(menus[0].getElementsByClassName("item")).innerText;
+	aud_q = getSel(menus[1].getElementsByClassName("item")).innerText;
+	fmt = getSel(menus[2].getElementsByClassName("item")).innerText;
+	console.log(vid_q, aud_q, fmt);
+	let req_cont = {
+		request: "download",
+		link: link,
+		format: fmt
+	}
+	req_cont["video-quality"] = vid_q;
+	req_cont["audio-quality"] = aud_q;
+	const resp = await post("/req", req_cont);
+	const json = await resp.json();
+	window.location = json.file;
 }

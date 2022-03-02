@@ -321,8 +321,18 @@ html, body {
 	font-size: 15px;
 }
 
+.scrollmenu .item.selected {
+	background: #f4f4f4;
+	color: #d00;
+	font-weight: bold;
+}
+
 .scrollmenu .item:hover {
 	background-color: #C03A3A;
+}
+
+.scrollmenu .item.selected:hover {
+	background: #c4c4c4;
 }
 
 .scrollmenu {
