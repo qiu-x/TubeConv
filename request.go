@@ -190,9 +190,14 @@ func download_request(w http.ResponseWriter, body []byte) {
 		"-o", "-", download_req.Link)
 		r, err = download.StdoutPipe()
 	}else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" {
-		download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<=" + 
-		strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
-		if download_req.Format != "mp4" {
+		if download_req.Format == "webm" {
+			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=webm][abr<=" + 
+			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
+		}else{
+			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<=" + 
+			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
+		}
+		if download_req.Format != "mp4" && download_req.Format != "webm" {
 			ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "mp3", "-")
 			ffmpeg.Stdin, _ = download.StdoutPipe()
 			r, err = ffmpeg.StdoutPipe()
