@@ -275,16 +275,16 @@ async function downloadVideo(menus, link) {
 		return itm[0];
 	};
 	vid_q = getSel(menus[0].getElementsByClassName("item")).innerText.trim();
-	aud_q = +(getSel(menus[1].getElementsByClassName("item")).innerText.trim());
+	aud_q = getSel(menus[1].getElementsByClassName("item")).innerText.trim();
 	fmt = getSel(menus[2].getElementsByClassName("item")).innerText.trim();
-	console.log(vid_q, aud_q, fmt);
 	let req_cont = {
 		request: "download",
 		link: link,
 		format: fmt
 	}
-	req_cont["video-quality"] = vid_q;
-	req_cont["audio-quality"] = aud_q;
+	req_cont["video-quality"] = String(vid_q);
+	req_cont["audio-quality"] = Number(+(aud_q));
+	console.log(req_cont);
 	const resp = await post("/req", req_cont);
 	const json = await resp.json();
 	window.location = json.file;
