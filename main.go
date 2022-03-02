@@ -60,7 +60,7 @@ func main() {
 	http.Handle("/", router)
 	fs := http.FileServer(http.Dir("."))
 	http.Handle("/res/", fileServerFilter(fs))
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8090", nil)
 }
 
 func check_request_type(w http.ResponseWriter, r *http.Request) {
