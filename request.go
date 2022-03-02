@@ -183,15 +183,13 @@ func download_request(w http.ResponseWriter, body []byte) {
 	var r io.ReadCloser
 	var err error
 
-	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" {
+	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" {
 		download = exec.Command("yt-dlp", "-f", "bestvideo[ext=" + download_req.Format + "][height<=" + 
 		download_req.Video_quality + "]+bestaudio[ext=m4a][abr<=" + 
 		strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]",
 		"-o", "-", download_req.Link)
 		r, err = download.StdoutPipe()
-	}
-
-	if download_req.Audio_quality != 0 && download_req.Video_quality == "none" {
+	}else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" {
 		download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<=" + 
 		strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
 		if download_req.Format != "mp4" {
@@ -201,12 +199,13 @@ func download_request(w http.ResponseWriter, body []byte) {
 		}else{
 			r, err = download.StdoutPipe()
 		}
-	}
-
-	if download_req.Audio_quality == 0 && download_req.Video_quality != "none" {
+	}else if download_req.Audio_quality == 0 && download_req.Video_quality != "none" {
 		download = exec.Command("yt-dlp", "-f", "bestvideo[ext=" + download_req.Format + "][height<=" + 
 		download_req.Video_quality + "]", "-o", "-", download_req.Link)
 		r, err = download.StdoutPipe()
+	}else{
+		log.Println("Wrong request")
+		return
 	}
 	if err != nil {
 		err_handle(err)
