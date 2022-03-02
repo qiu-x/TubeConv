@@ -13,7 +13,7 @@
   <h3 align="center">Paste a link to a video, or use the search bar<h3>
   <img width="1012px" src="res/readme/2.png" alt="second step" />
   
-  <h3 align="center">Choose a the quality, video/audio format that suits you (by default the best quality is selected)<h3>
+  <h3 align="center">Choose the quality and video/audio format that suits you (by default the best quality is selected)<h3>
   <img width="1012px" src="res/readme/3.png" alt="third step" />
     
   <h3 align="center">Click the download button!</h3>
