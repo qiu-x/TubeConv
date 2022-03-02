@@ -80,11 +80,16 @@ func query_request(w http.ResponseWriter, body []byte) {
 	if err != nil {
 		err_handle(err)
 	}
-	contents := ytInitialDataJSON["contents"].(map[string]interface{})["twoColumnSearchResultsRenderer"].
+	contents, check := ytInitialDataJSON["contents"].(map[string]interface{})["twoColumnSearchResultsRenderer"].
 	(map[string]interface{})["primaryContents"].(map[string]interface{})["sectionListRenderer"].
 	(map[string]interface{})["contents"].([]interface{})[0].(map[string]interface{})["itemSectionRenderer"].
 	(map[string]interface{})["contents"].([]interface{})
 	
+	if !check {
+		log.Println("Error: Getting data from yotube")
+		return
+	}
+
 	type video struct {
 		Title     string `json:"title"`
 		Author    string `json:"author"`
@@ -94,17 +99,37 @@ func query_request(w http.ResponseWriter, body []byte) {
 	var vids []video
 
 	for _, v := range contents {
-		if v.(map[string]interface{})["videoRenderer"] == nil {
+		videoRenderer, _ := v.(map[string]interface{})["videoRenderer"].(map[string]interface{})
+		if videoRenderer == nil {
 			continue
 		}
-		vid := video{v.(map[string]interface{})["videoRenderer"].(map[string]interface{})["title"].
-		(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string), 
-		v.(map[string]interface{})["videoRenderer"].(map[string]interface{})["longBylineText"].
-		(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string),
-		"https://www.youtube.com/watch?v=" + v.(map[string]interface{})["videoRenderer"].
-		(map[string]interface{})["videoId"].(string), 
-		v.(map[string]interface{})["videoRenderer"].(map[string]interface{})["thumbnail"].
-		(map[string]interface{})["thumbnails"].([]interface{})[0].(map[string]interface{})["url"].(string)}
+		title, check := videoRenderer["title"].
+		(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string)
+		if !check {
+			log.Println("Error: title missing")
+			return
+		}
+		author, check := videoRenderer["longBylineText"].
+		(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string)
+		if !check {
+			log.Println("Error: author missing")
+			return
+		}
+		link, check := videoRenderer["videoId"].(string)
+		if !check {
+			log.Println("Error: link missing")
+			return
+		}
+		link = "https://www.youtube.com/watch?v=" + link
+
+		url, check := videoRenderer["thumbnail"].
+		(map[string]interface{})["thumbnails"].([]interface{})[0].(map[string]interface{})["url"].(string)
+		if !check {
+			log.Println("Error: thumbnail missing")
+			return
+		}
+
+		vid := video{title, author, link, url}
 
 		vids = append(vids, vid)
 	}
@@ -144,21 +169,39 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 
 	var format_exist = make(map[string]int)
 	for _, v := range formats {
-		if v.(map[string]interface{})["format_note"].(string) == "storyboard" {
+		aserted_v, check := v.(map[string]interface{})
+		if !check {
+			log.Println("Error: Getting data from yt-dlp")
+			return
+		}
+
+		storyboard, check := aserted_v["format_note"].(string)
+		if !check {
+			log.Println("Error: storyboard missing")
+			return
+		}
+		if storyboard == "storyboard" {
 			continue
 		}
-		_, exist := format_exist[v.(map[string]interface{})["format_note"].(string)]
+		_, exist := format_exist[aserted_v["format_note"].(string)]
 		if exist {
 			continue
 		}
-
-		if v.(map[string]interface{})["resolution"].(string) == "audio only" {
-			vid_info.Audio_quality = append(vid_info.Audio_quality, v.
-			(map[string]interface{})["abr"].(float64))
+		audio_only, check := aserted_v["resolution"].(string)
+		if !check {
+			log.Println("Error: audio-only missing")
+			return
+		}
+		if audio_only == "audio only" {
+			abr, check := aserted_v["abr"].(float64)
+			if !check {
+				log.Println("Error: abr missing")
+				return
+			}
+			vid_info.Audio_quality = append(vid_info.Audio_quality, abr)
 		}else {
-			format_exist[v.(map[string]interface{})["format_note"].(string)] = 0
-			vid_info.Video_quality = append(vid_info.Video_quality, v.
-			(map[string]interface{})["format_note"].(string))
+			format_exist[aserted_v["format_note"].(string)] = 0
+			vid_info.Video_quality = append(vid_info.Video_quality, aserted_v["format_note"].(string))
 		}
 	}
 
