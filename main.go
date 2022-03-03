@@ -9,7 +9,26 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"flag"
 )
+
+var (
+	port string
+	ssl_full_path string
+	ssl_priv_path string
+	help bool
+)
+
+func init() {
+	flag.StringVar(&ssl_full_path, "cf", "", "Path to the full chain SSL certificate")
+	flag.StringVar(&ssl_priv_path, "cp", "", "Path to the private SSL certificate")
+	flag.StringVar(&port, "p", "80", "Application Port")
+
+	flag.StringVar(&ssl_full_path, "cert-full", "", "Path to the full chain SSL certificate")
+	flag.StringVar(&ssl_priv_path, "cert-priv", "", "Path to the private SSL certificate")
+	flag.StringVar(&port, "port", "80", "Application Port")
+	flag.Parse()
+}
 
 type Request_type struct {
 	Request string
@@ -60,7 +79,16 @@ func main() {
 	http.Handle("/", router)
 	fs := http.FileServer(http.Dir("."))
 	http.Handle("/res/", fileServerFilter(fs))
-	http.ListenAndServe(":8090", nil)
+	log.Println("Listening on port: ", port)
+	var err error
+	if len(ssl_full_path) != 0 && len(ssl_priv_path) != 0 {
+		err = http.ListenAndServeTLS(":"+port, ssl_full_path, ssl_priv_path, nil)
+	} else {
+		log.Println("Continuing without SSL")
+		err = http.ListenAndServe(":"+port, nil)
+	}
+	if err != nil { log.Fatal(err) }
+
 }
 
 func check_request_type(w http.ResponseWriter, r *http.Request) {
