@@ -259,10 +259,16 @@ func download_request(w http.ResponseWriter, body []byte) {
 		err_handle(err)
 	}
 	download.Start()
-	go func() { download.Process.Wait() }()
+	go func() {
+		download.Process.Wait()
+		download.Process.Kill()
+	}()
 	if ffmpeg != nil {
 		ffmpeg.Start()
-		go func() { ffmpeg.Process.Wait() }()
+		go func() {
+			ffmpeg.Process.Wait()
+			ffmpeg.Process.Kill()
+		}()
 	}
 
 	var seededRand *rand.Rand = rand.New(
