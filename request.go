@@ -259,8 +259,10 @@ func download_request(w http.ResponseWriter, body []byte) {
 		err_handle(err)
 	}
 	download.Start()
+	go func() { download.Process.Wait() }()
 	if ffmpeg != nil {
 		ffmpeg.Start()
+		go func() { ffmpeg.Process.Wait() }()
 	}
 
 	var seededRand *rand.Rand = rand.New(
@@ -308,4 +310,5 @@ func download_link_generator(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("content-disposition", "attachment; filename="+r.Name)
 	buffer := make([]byte, 1024)
 	io.CopyBuffer(w, r.File, buffer)
+	r.File.Close()
 }

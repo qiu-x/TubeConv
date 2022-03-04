@@ -65,7 +65,7 @@ type SafeMap struct{
 
 type Download_data struct {
 	Name   string
-	File   io.Reader
+	File   io.ReadCloser
 }
 
 var Mapa SafeMap
