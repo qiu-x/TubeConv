@@ -13,9 +13,9 @@
     <meta property="og:description" content="TubeConv is a free and open source converter and downloader for Youtube videos in MP3 or MP4 and other formats. Best Youtube Video Downloader."/>
     <link rel="icon" type="image/png" sizes="32x32" href="/res/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/res/icons/favicon-16x16.png">
+    <title>TubeConv</title>
   </head>
   <body>
-    <title>TubeConv</title>
     <div style="display: none" id="video-info-temp">
       <div class="scrollmenu">
        <div class="item" onclick="selItem(this)"></div>
@@ -29,18 +29,19 @@
     </div>
     <div id="main-view">
       <div id="search">
-        <img id="logo" src="res/logo.png">
+        <img alt="logo" id="logo" src="res/logo.png">
         <div id="search-box">
           <input id="search-input" autofocus type="search" name="search-text" placeholder="Search or paste a link">
-          <div id="button" onclick="searchFunc()" type="submit">
-            <img src="res/glass.svg" style="width: 65%; height: 65%; filter: invert(1);" id="dagger" />
+          <div id="button" onclick="searchFunc()">
+            <img alt="glass" src="res/glass.svg" style="width: 65%; height: 65%; filter: invert(1);"/>
+          </div>
         </div>
       </div>
       <div id="video-template" class="template">
-        <img class="thumb" src="res/thumb.jpg">
+        <img alt="thumbnail" class="thumb" src="res/thumb.jpg">
         <div class="video-info"></div>
         <div class="download-button">
-            <img src="res/arrow.svg" class="arrow" id="dagger"/>
+            <img alt="arrow" src="res/arrow.svg" class="arrow"/>
         </div>
         <div class="alt-bg"></div>
       </div>
