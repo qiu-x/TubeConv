@@ -226,13 +226,13 @@ func download_request(w http.ResponseWriter, body []byte) {
 	var r io.ReadCloser
 	var err error
 
-	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" {
+	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" && download_req.Format != "ogg" {
 		download = exec.Command("yt-dlp", "-f", "bestvideo[ext=" + download_req.Format + "][height<=" + 
 		download_req.Video_quality + "]+bestaudio[ext=m4a][abr<=" + 
 		strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]",
 		"-o", "-", download_req.Link)
 		r, err = download.StdoutPipe()
-	}else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" {
+	}else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" || download_req.Format == "ogg" {
 		if download_req.Format == "webm" {
 			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=webm][abr<=" + 
 			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
