@@ -241,9 +241,15 @@ func download_request(w http.ResponseWriter, body []byte) {
 			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
 		}
 		if download_req.Format != "mp4" && download_req.Format != "webm" {
-			ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "mp3", "-")
-			ffmpeg.Stdin, _ = download.StdoutPipe()
-			r, err = ffmpeg.StdoutPipe()
+			if download_req.Format == "ogg" {
+				ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "ogg", "-")
+				ffmpeg.Stdin, _ = download.StdoutPipe()
+				r, err = ffmpeg.StdoutPipe()
+			}else {
+				ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "mp3", "-")
+				ffmpeg.Stdin, _ = download.StdoutPipe()
+				r, err = ffmpeg.StdoutPipe()
+			}
 		}else{
 			r, err = download.StdoutPipe()
 		}
