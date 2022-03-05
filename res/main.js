@@ -239,7 +239,7 @@ function showInfo(infoElem, json) {
 	menu_info = [
 		json.video_quality.reverse(),
 		json.audio_quality.reverse(),
-		["mp4", "webm", "mp3"]
+		["mp4", "webm", "mp3", "ogg"]
 	]
 	for (let i = 0; i < 3; i++) {
 		assign_text(menus[i], menu_info[i]);
