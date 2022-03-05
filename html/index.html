@@ -13,20 +13,20 @@
     <meta property="og:description" content="TubeConv is a free and open source converter and downloader for Youtube videos in MP3 or MP4 and other formats. Best Youtube Video Downloader."/>
     <link rel="icon" type="image/png" sizes="32x32" href="/res/icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/res/icons/favicon-16x16.png">
-    <title>TubeConv</title>
-      <div style="display: none" id="video-info-temp">
-        <div class="scrollmenu">
-	        <div class="item" onclick="selItem(this)"></div>
-        </div>
-        <div class="scrollmenu">
-	        <div class="item" onclick="selItem(this)"></div>
-        </div>
-        <div class="scrollmenu">
-	        <div class="item" onclick="selItem(this)"></div>
-        </div>
-      </div>
   </head>
   <body>
+    <title>TubeConv</title>
+    <div style="display: none" id="video-info-temp">
+      <div class="scrollmenu">
+       <div class="item" onclick="selItem(this)"></div>
+      </div>
+      <div class="scrollmenu">
+       <div class="item" onclick="selItem(this)"></div>
+      </div>
+      <div class="scrollmenu">
+       <div class="item" onclick="selItem(this)"></div>
+      </div>
+    </div>
     <div id="main-view">
       <div id="search">
         <img id="logo" src="res/logo.png">
@@ -34,7 +34,6 @@
           <input id="search-input" autofocus type="search" name="search-text" placeholder="Search or paste a link">
           <div id="button" onclick="searchFunc()" type="submit">
             <img src="res/glass.svg" style="width: 65%; height: 65%; filter: invert(1);" id="dagger" />
-          </button>
         </div>
       </div>
       <div id="video-template" class="template">
