@@ -37,13 +37,14 @@ type Request_type struct {
 var router = mux.NewRouter()
 
 func simpleHandler(filepath string) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		htmlRaw, err := ioutil.ReadFile(filepath)
-		if err != nil {
-			log.Fatal(err)
+	htmlRaw, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		log.Fatal(err)
+		return func(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
-			return
 		}
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
 		w.Write(htmlRaw)
 	}
 }
