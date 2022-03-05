@@ -41,6 +41,7 @@ html, body {
 #logo {
 	display: inline-block;
 	width: 50%;
+	aspect-ratio: 296/96;
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -webkit-optimize-contrast;
 	image-rendering: crisp-edges;
