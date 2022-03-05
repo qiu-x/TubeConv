@@ -54,6 +54,7 @@ func fileServerFilter(next http.Handler) http.Handler {
 			http.NotFound(w, r)
 			return
 		}
+		w.Header().Set("Cache-Control", "max-age=432000")
 		next.ServeHTTP(w, r)
 	})
 }
