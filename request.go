@@ -2,19 +2,19 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os/exec"
-	"strings"
 	"strconv"
-	"io"
-	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"gopkg.in/validator.v2"
 	"github.com/gorilla/mux"
+	"gopkg.in/validator.v2"
 )
 
 func err_handle(err error) {
@@ -78,7 +78,7 @@ func query_request(w http.ResponseWriter, body []byte) {
 	index := strings.Index(html.Text(), "ytInitialData")
 	ytInitialData := strings.Split(html.Text()[index:], "if (")[0]
 	ytInitialData = strings.Split(ytInitialData, "ytInitialData =")[1]
-	ytInitialData_byte := []byte(ytInitialData)[:len(ytInitialData) - 1]
+	ytInitialData_byte := []byte(ytInitialData)[:len(ytInitialData)-1]
 	ytInitialData = string(ytInitialData_byte)
 
 	var ytInitialDataJSON map[string]interface{}
@@ -86,11 +86,8 @@ func query_request(w http.ResponseWriter, body []byte) {
 	if err != nil {
 		err_handle(err)
 	}
-	contents, check := ytInitialDataJSON["contents"].(map[string]interface{})["twoColumnSearchResultsRenderer"].
-	(map[string]interface{})["primaryContents"].(map[string]interface{})["sectionListRenderer"].
-	(map[string]interface{})["contents"].([]interface{})[0].(map[string]interface{})["itemSectionRenderer"].
-	(map[string]interface{})["contents"].([]interface{})
-	
+	contents, check := ytInitialDataJSON["contents"].(map[string]interface{})["twoColumnSearchResultsRenderer"].(map[string]interface{})["primaryContents"].(map[string]interface{})["sectionListRenderer"].(map[string]interface{})["contents"].([]interface{})[0].(map[string]interface{})["itemSectionRenderer"].(map[string]interface{})["contents"].([]interface{})
+
 	if !check {
 		log.Println("Error: Getting data from yotube")
 		return
@@ -109,14 +106,12 @@ func query_request(w http.ResponseWriter, body []byte) {
 		if videoRenderer == nil {
 			continue
 		}
-		title, check := videoRenderer["title"].
-		(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string)
+		title, check := videoRenderer["title"].(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string)
 		if !check {
 			log.Println("Error: title missing")
 			return
 		}
-		author, check := videoRenderer["longBylineText"].
-		(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string)
+		author, check := videoRenderer["longBylineText"].(map[string]interface{})["runs"].([]interface{})[0].(map[string]interface{})["text"].(string)
 		if !check {
 			log.Println("Error: author missing")
 			return
@@ -128,8 +123,7 @@ func query_request(w http.ResponseWriter, body []byte) {
 		}
 		link = "https://www.youtube.com/watch?v=" + link
 
-		url, check := videoRenderer["thumbnail"].
-		(map[string]interface{})["thumbnails"].([]interface{})[0].(map[string]interface{})["url"].(string)
+		url, check := videoRenderer["thumbnail"].(map[string]interface{})["thumbnails"].([]interface{})[0].(map[string]interface{})["url"].(string)
 		if !check {
 			log.Println("Error: thumbnail missing")
 			return
@@ -165,8 +159,8 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 	formats := output_json["formats"].([]interface{})
 
 	type video_info struct {
-		Video_quality    []string `json:"video_quality"`
-		Audio_quality    []float64 `json:"audio_quality"`
+		Video_quality []string  `json:"video_quality"`
+		Audio_quality []float64 `json:"audio_quality"`
 	}
 
 	var vid_info video_info
@@ -205,7 +199,7 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 				return
 			}
 			vid_info.Audio_quality = append(vid_info.Audio_quality, abr)
-		}else {
+		} else {
 			format_exist[aserted_v["format_note"].(string)] = 0
 			vid_info.Video_quality = append(vid_info.Video_quality, aserted_v["format_note"].(string))
 		}
@@ -220,11 +214,11 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 
 func download_request(w http.ResponseWriter, body []byte) {
 	download_req := struct {
-		Request 	   string
-		Link    	   string
-		Video_quality  string `json:"video-quality"`
-		Audio_quality  float64 `json:"audio-quality"`
-		Format		   string
+		Request       string
+		Link          string
+		Video_quality string  `json:"video-quality"`
+		Audio_quality float64 `json:"audio-quality"`
+		Format        string
 	}{}
 	json.Unmarshal(body, &download_req)
 	var download *exec.Cmd
@@ -232,38 +226,38 @@ func download_request(w http.ResponseWriter, body []byte) {
 	var r io.ReadCloser
 	var err error
 
-	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" && download_req.Format != "ogg" {
-		download = exec.Command("yt-dlp", "-f", "bestvideo[ext=" + download_req.Format + "][height<=" + 
-		download_req.Video_quality + "]+bestaudio[ext=m4a][abr<=" + 
-		strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]",
-		"-o", "-", download_req.Link)
+	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" && download_req.Format != "ogg" && download_req.Format != "m4a" {
+		download = exec.Command("yt-dlp", "-f", "bestvideo[ext="+download_req.Format+"][height<="+
+			download_req.Video_quality+"]+bestaudio[ext=m4a][abr<="+
+			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]",
+			"-o", "-", download_req.Link)
 		r, err = download.StdoutPipe()
-	}else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" || download_req.Format == "ogg" {
+	} else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" || download_req.Format == "ogg" || download_req.Format == "m4a" {
 		if download_req.Format == "webm" {
-			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=webm][abr<=" + 
-			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
-		}else{
-			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<=" + 
-			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]", "-o", "-", download_req.Link)
+			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=webm][abr<="+
+				strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]", "-o", "-", download_req.Link)
+		} else {
+			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<="+
+				strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]", "-o", "-", download_req.Link)
 		}
-		if download_req.Format != "mp4" && download_req.Format != "webm" {
+		if download_req.Format != "m4a" && download_req.Format != "webm" {
 			if download_req.Format == "ogg" {
 				ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "ogg", "-")
 				ffmpeg.Stdin, _ = download.StdoutPipe()
 				r, err = ffmpeg.StdoutPipe()
-			}else {
+			} else {
 				ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "mp3", "-")
 				ffmpeg.Stdin, _ = download.StdoutPipe()
 				r, err = ffmpeg.StdoutPipe()
 			}
-		}else{
+		} else {
 			r, err = download.StdoutPipe()
 		}
-	}else if download_req.Audio_quality == 0 && download_req.Video_quality != "none" {
-		download = exec.Command("yt-dlp", "-f", "bestvideo[ext=" + download_req.Format + "][height<=" + 
-		download_req.Video_quality + "]", "-o", "-", download_req.Link)
+	} else if download_req.Audio_quality == 0 && download_req.Video_quality != "none" {
+		download = exec.Command("yt-dlp", "-f", "bestvideo[ext="+download_req.Format+"][height<="+
+			download_req.Video_quality+"]", "-o", "-", download_req.Link)
 		r, err = download.StdoutPipe()
-	}else{
+	} else {
 		log.Println("Wrong request")
 		return
 	}
@@ -284,26 +278,25 @@ func download_request(w http.ResponseWriter, body []byte) {
 	}
 
 	var seededRand *rand.Rand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))	  
+		rand.NewSource(time.Now().UnixNano()))
 	const charset = "abcdefghijklmnopqrstuvwxyz" +
-  	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	id := make([]byte, 25)
-  	for i := range id {
-    	id[i] = charset[seededRand.Intn(len(charset))]
-  	}
+	for i := range id {
+		id[i] = charset[seededRand.Intn(len(charset))]
+	}
 
 	file_name, err := exec.Command("yt-dlp", "--get-filename", download_req.Link).Output()
 	if err != nil {
 		err_handle(err)
 	}
 	filename_arr := strings.Split(string(file_name), ".")
-	filename := strings.Join(filename_arr[:len(filename_arr) - 1], "") + "." + download_req.Format
+	filename := strings.Join(filename_arr[:len(filename_arr)-1], "") + "." + download_req.Format
 
-	
 	Mapa.Mutex.Lock()
 	Mapa.Map[string(id)] = Download_data{filename, r}
 	Mapa.Mutex.Unlock()
-	down_link := struct{
+	down_link := struct {
 		File string `json:"file"`
 	}{
 		"/download/" + string(id),
@@ -320,7 +313,7 @@ func download_link_generator(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	r, exist := Mapa.Map[vars["id"]]
 	if !exist {
-		http.NotFound(w,req)
+		http.NotFound(w, req)
 		return
 	}
 	delete(Mapa.Map, vars["id"])
