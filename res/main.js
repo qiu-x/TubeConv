@@ -167,7 +167,7 @@ async function queryVideo(title) {
 	const json_videos = json.videos;
 	console.log(json);
 	for (let i = 0; i < json_videos.length; i++) {
-		vid = template.cloneNode(true);
+		let vid = template.cloneNode(true);
 		vid.id = "video";
 		vid.classList.remove("template");
 		vid.classList.add("video");
@@ -179,7 +179,7 @@ async function queryVideo(title) {
 		san_element.innerText = json_videos[i].author;
 		vid.getElementsByClassName("video-info").item(0).innerHTML += san_element.innerHTML;
 		vid.getElementsByClassName("thumb").item(0).src = json_videos[i].thumbnail;
-		dl_button = vid.getElementsByClassName("download-button").item(0);
+		let dl_button = vid.getElementsByClassName("download-button").item(0);
 		dl_button.onclick = () => {videoInfo(vid, json_videos[i].link);};
 		dl_button.id = json_videos[i].link;
 		document.getElementById("main-view").appendChild(vid);
@@ -251,7 +251,7 @@ function showInfo(infoElem, json) {
 	let menu_info = [
 		json.video_quality.reverse(),
 		json.audio_quality.reverse(),
-		["mp4", "webm", "mp3", "ogg"]
+		["mp4", "webm", "mp3", "ogg", "m4a"]
 	]
 	for (let i = 0; i < 3; i++) {
 		assign_text(menus[i], menu_info[i]);
