@@ -75,9 +75,12 @@ document.getElementById("search-input").addEventListener("keydown", event => {
 });
 
 async function searchFunc() {
+	txt = document.getElementById("search-input").value;
+	if (txt == "") {
+		return
+	}
 	document.activeElement.blur();
 	await clearResoult();
-	txt = document.getElementById("search-input").value;
 	await checkLink(txt);
 	await showResoult();
 }
