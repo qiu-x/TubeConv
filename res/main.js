@@ -117,11 +117,8 @@ async function clearResoult() {
 		vids[i].style.opacity = 0;
 	}
 	let arr = Array.from(vids);
-	var now = Date.now();
 	vids.item(0).addEventListener("transitionend", () => {
 		arr.map(x => x.remove())
-		console.log(arr)
-		console.log(Date.now() - now);
 		spinner(true);
 	});
 }
@@ -175,20 +172,20 @@ async function queryVideo(title) {
 }
 
 async function videoInfo(index, link) {
-	elem = document.getElementsByClassName("video").item(index);
+	let elem = document.getElementsByClassName("video").item(index);
 
 	// Animate background
-	bg = elem.getElementsByClassName("alt-bg").item(0)
+	let bg = elem.getElementsByClassName("alt-bg").item(0)
 	bg.style.width = "100%";
-	dl_button = elem.getElementsByClassName("download-button").item(0);
+	let dl_button = elem.getElementsByClassName("download-button").item(0);
 	dl_button.classList.add("final")
-	arrow = dl_button.getElementsByTagName("img").item(0);
+	let arrow = dl_button.getElementsByTagName("img").item(0);
 	arrow.classList.add("final");
 
-	info = elem.querySelector(".video-info")
+	let info = elem.querySelector(".video-info")
 
 	// Make spinner
-	spn = makeLocalSpinner();
+	let spn = makeLocalSpinner();
 	info.appendChild(spn.spinner);
 	bg.addEventListener("transitionend", () => spn.show());
 
@@ -207,7 +204,7 @@ async function videoInfo(index, link) {
 }
 
 function selItem(item) {
-	items = Array.from(item.parentNode.getElementsByClassName("item"));
+	let items = Array.from(item.parentNode.getElementsByClassName("item"));
 	for (let i = 0; i < items.length; i++) {
 		items[i].classList.remove("selected");
 	}
@@ -216,7 +213,7 @@ function selItem(item) {
 
 function showInfo(infoElem, json) {
 	// Store the current element height
-	old_h = getComputedStyle(infoElem).height;
+	let old_h = getComputedStyle(infoElem).height;
 	infoElem.style.height = old_h;
 	// Load element template
 	infoElem.innerHTML = document.getElementById("video-info-temp").innerHTML;
@@ -224,10 +221,10 @@ function showInfo(infoElem, json) {
 	infoElem.style.opacity = 0;
 
 	// Helper function for filling the menu items
-	assign_text = (menu, arr) => {
-		item_empty = menu.getElementsByClassName("item").item(0);
+	let assign_text = (menu, arr) => {
+		let item_empty = menu.getElementsByClassName("item").item(0);
 		for (let i = 0; i < arr.length; i++) {
-			item = item_empty.cloneNode(true);
+			let item = item_empty.cloneNode(true);
 			item.innerText = arr[i];
 			menu.appendChild(item);
 		}
@@ -235,8 +232,8 @@ function showInfo(infoElem, json) {
 	}
 
 	// Fill the menus
-	menus = Array.from(elem.getElementsByClassName("scrollmenu"));
-	menu_info = [
+	let menus = Array.from(infoElem.getElementsByClassName("scrollmenu"));
+	let menu_info = [
 		json.video_quality.reverse(),
 		json.audio_quality.reverse(),
 		["mp4", "webm", "mp3", "ogg"]
@@ -258,10 +255,10 @@ function showInfo(infoElem, json) {
 
 async function makeDownloadButton(vidElem) {
 	dl_btn = vidElem.getElementsByClassName("download-button").item(0);
-	menus = Array.from(vidElem.getElementsByClassName("scrollmenu"));
 	dl_btn.onclick = () => {
-		console.log("hi");
-		downloadVideo(menus, dl_btn.id);
+		let l_dl_btn = vidElem.getElementsByClassName("download-button").item(0);
+		let l_menus = Array.from(vidElem.getElementsByClassName("scrollmenu"));
+		downloadVideo(l_menus, l_dl_btn.id);
 	};
 }
 
