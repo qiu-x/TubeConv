@@ -134,12 +134,27 @@ async function checkLink(txt) {
 		await queryVideo(txt);
 		break;
 	case "link":
-		// videoInfo(txt);
+		queryVideoByLink(txt);
 		break;
 	default:
 		log("bad response")
 		break;
 	}
+}
+
+async function queryVideoByLink(link) {
+	const template = document.getElementById("video-template");
+	let vid = template.cloneNode(true);
+	vid.id = "video";
+	vid.classList.remove("template");
+	vid.classList.add("video");
+	vid.getElementsByClassName("thumb").item(0).src = "https://i.ytimg.com/vi/" +
+		link.split("=")[1] + "/hqdefault.jpg";
+	let dl_button = vid.getElementsByClassName("download-button").item(0);
+	dl_button.id = link;
+	dl_button.onclick = () => {videoInfo(0, link);};
+	document.getElementById("main-view").appendChild(vid);
+	videoInfo(vid, link);
 }
 
 async function queryVideo(title) {
@@ -165,14 +180,14 @@ async function queryVideo(title) {
 		vid.getElementsByClassName("video-info").item(0).innerHTML += san_element.innerHTML;
 		vid.getElementsByClassName("thumb").item(0).src = json_videos[i].thumbnail;
 		dl_button = vid.getElementsByClassName("download-button").item(0);
-		dl_button.onclick = () => {videoInfo(i, json_videos[i].link);};
+		dl_button.onclick = () => {videoInfo(vid, json_videos[i].link);};
 		dl_button.id = json_videos[i].link;
 		document.getElementById("main-view").appendChild(vid);
 	}
 }
 
-async function videoInfo(index, link) {
-	let elem = document.getElementsByClassName("video").item(index);
+async function videoInfo(element, link) {
+	let elem = element;
 
 	// Animate background
 	let bg = elem.getElementsByClassName("alt-bg").item(0)
