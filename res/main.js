@@ -9,9 +9,9 @@ function post(url, data) {
 function log(text) {
 	let caller = arguments.callee.caller
 	if (caller != null) {
-		console.log(caller.name.toString() + ": " + text)
+		console.log(caller.name.toString() + ": ", text)
 	} else {
-		console.log("main: " + text)
+		console.log("main: ", text)
 	}
 }
 
@@ -165,7 +165,7 @@ async function queryVideo(title) {
 	const json = await resp.json();
 	const template = document.getElementById("video-template");
 	const json_videos = json.videos;
-	console.log(json);
+	log(json);
 	for (let i = 0; i < json_videos.length; i++) {
 		let vid = template.cloneNode(true);
 		vid.id = "video";
@@ -270,10 +270,15 @@ function showInfo(infoElem, json) {
 
 async function makeDownloadButton(vidElem) {
 	dl_btn = vidElem.getElementsByClassName("download-button").item(0);
-	dl_btn.onclick = () => {
+	dl_btn.onclick = async () => {
+		old_onclick = dl_btn.onclick;
 		let l_dl_btn = vidElem.getElementsByClassName("download-button").item(0);
 		let l_menus = Array.from(vidElem.getElementsByClassName("scrollmenu"));
-		downloadVideo(l_menus, l_dl_btn.id);
+		let arrow = dl_btn.getElementsByClassName("arrow").item(0);
+		arrow.style.filter = "invert(1) brightness(0.5) sepia(1) saturate(0%)"
+		await downloadVideo(l_menus, l_dl_btn.id);
+		arrow.style.filter = "invert(1) brightness(0.5) sepia(1) saturate(10000%)"
+		dl_btn.onclick = old_onclick;
 	};
 }
 
@@ -296,7 +301,6 @@ async function downloadVideo(menus, link) {
 	}
 	req_cont["video-quality"] = String(vid_q);
 	req_cont["audio-quality"] = Number(+(aud_q));
-	console.log(req_cont);
 	const resp = await post("/req", req_cont);
 	const json = await resp.json();
 	window.location = json.file;
