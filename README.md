@@ -30,6 +30,8 @@
   <h2 align="center">To-Do List</h2>
   <ul>
     <li>More video/audio formats</li>
+    <li>Add proper unit tests</li>
+
   </ul> 
 
   
