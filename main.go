@@ -2,19 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"io/ioutil"
-	"io"
-	"log"
-	"net/http"
-	"strings"
-	"sync"
 	"flag"
 	"fmt"
+	"github.com/gorilla/mux"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
+	"strings"
+	"sync"
 )
 
-const HELP =` Flags:
+const HELP = ` Flags:
 --port, -p
         Set the application port
 --cert-full, -cf
@@ -24,11 +24,12 @@ const HELP =` Flags:
 --help, -h
         Print this message
 `
+
 var (
-	port string
+	port          string
 	ssl_full_path string
 	ssl_priv_path string
-	help bool
+	help          bool
 )
 
 func printHelp(string) error {
@@ -82,14 +83,14 @@ func fileServerFilter(next http.Handler) http.Handler {
 	})
 }
 
-type SafeMap struct{
+type SafeMap struct {
 	Mutex sync.Mutex
-	Map  map[string]Download_data
+	Map   map[string]Download_data
 }
 
 type Download_data struct {
-	Name   string
-	File   io.ReadCloser
+	Name string
+	File io.ReadCloser
 }
 
 var Mapa SafeMap
@@ -111,7 +112,9 @@ func main() {
 		log.Println("Continuing without SSL")
 		err = http.ListenAndServe(":"+port, nil)
 	}
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
 
@@ -123,13 +126,14 @@ func check_request_type(w http.ResponseWriter, r *http.Request) {
 	var req_type Request_type
 	json.Unmarshal(body, &req_type)
 
-	if req_type.Request == "check-link" {
+	switch req_type.Request {
+	case "check-link":
 		checklink_request(w, body)
-	}else if req_type.Request == "query" {
+	case "query":
 		query_request(w, body)
-	}else if req_type.Request == "video-info" {
+	case "video-info":
 		videoinfo_request(w, body)
-	}else if req_type.Request == "download" {
+	case "download":
 		download_request(w, body)
 	}
 }
