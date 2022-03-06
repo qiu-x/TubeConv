@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"gopkg.in/validator.v2"
 	"github.com/gorilla/mux"
 )
 
@@ -52,10 +53,15 @@ func checklink_request(w http.ResponseWriter, body []byte) {
 func query_request(w http.ResponseWriter, body []byte) {
 	query_req := struct {
 		Request string
-		Text    string
+		Text    string `validate:"nonzero"`
 	}{}
 	json.Unmarshal(body, &query_req)
-	log.Println(query_req)
+	if errs := validator.Validate(query_req); errs != nil {
+		log.Println("Error:", errs)
+		return
+	}
+	search_text := query_req.Text
+	log.Println("Revived query request for:", search_text)
 
 	text := strings.ReplaceAll(query_req.Text, " ", "+")
 	parse, err := http.Get("https://www.youtube.com/results?search_query=" + text)
