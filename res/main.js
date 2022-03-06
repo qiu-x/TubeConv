@@ -251,7 +251,7 @@ function showInfo(infoElem, json) {
 	let menu_info = [
 		json.video_quality.reverse(),
 		json.audio_quality.reverse(),
-		["mp4", "webm", "mp3", "ogg", "m4a"]
+		["mp4", "webm", "mp3", "ogg"]
 	]
 	for (let i = 0; i < 3; i++) {
 		assign_text(menus[i], menu_info[i]);

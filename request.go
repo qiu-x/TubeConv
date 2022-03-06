@@ -61,7 +61,7 @@ func query_request(w http.ResponseWriter, body []byte) {
 		return
 	}
 	search_text := query_req.Text
-	log.Println("Revived query request for:", search_text)
+	log.Println("Recived query request for:", search_text)
 
 	text := strings.ReplaceAll(query_req.Text, " ", "+")
 	parse, err := http.Get("https://www.youtube.com/results?search_query=" + text)
@@ -226,13 +226,13 @@ func download_request(w http.ResponseWriter, body []byte) {
 	var r io.ReadCloser
 	var err error
 
-	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" && download_req.Format != "ogg" && download_req.Format != "m4a" {
+	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" && download_req.Format != "ogg" {
 		download = exec.Command("yt-dlp", "-f", "bestvideo[ext="+download_req.Format+"][height<="+
 			download_req.Video_quality+"]+bestaudio[ext=m4a][abr<="+
 			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]",
 			"-o", "-", download_req.Link)
 		r, err = download.StdoutPipe()
-	} else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" || download_req.Format == "ogg" || download_req.Format == "m4a" {
+	} else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" || download_req.Format == "ogg" {
 		if download_req.Format == "webm" {
 			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=webm][abr<="+
 				strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]", "-o", "-", download_req.Link)
@@ -240,7 +240,7 @@ func download_request(w http.ResponseWriter, body []byte) {
 			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<="+
 				strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]", "-o", "-", download_req.Link)
 		}
-		if download_req.Format != "m4a" && download_req.Format != "webm" {
+		if download_req.Format != "mp4" && download_req.Format != "webm" {
 			if download_req.Format == "ogg" {
 				ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "ogg", "-")
 				ffmpeg.Stdin, _ = download.StdoutPipe()
