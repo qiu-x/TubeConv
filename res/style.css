@@ -350,3 +350,26 @@ html, body {
 	margin: auto;
 	transition: all 0.5s;
 }
+
+@media (prefers-color-scheme: dark) {
+	html, body {
+		color: #fff;
+		background-color: #000;
+	}
+	#search-box {
+		color: #fff;
+		background: #303030;
+	}
+	#search-box input {
+		color: #fff;
+		background: #303030;
+	}
+	.video {
+		color: #fff;
+		background: #303030;
+	}
+	.video .video-info {
+		color: #fff;
+	}
+
+}
