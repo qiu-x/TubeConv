@@ -234,7 +234,7 @@ html, body {
 	/* } */
 }
 
-@media (max-width: 387px) {
+@media (max-width: 500px) {
 	.video {
 		display: inline-block !important;
 		height: 290px;
