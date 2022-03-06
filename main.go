@@ -10,8 +10,20 @@ import (
 	"strings"
 	"sync"
 	"flag"
+	"fmt"
+	"os"
 )
 
+const HELP =` Flags:
+--port, -p
+        Set the application port
+--cert-full, -cf
+        Path to the full chain SSL certificate
+--cert-priv, -cp
+        Path to the private SSL certificate
+--help, -h
+        Print this message
+`
 var (
 	port string
 	ssl_full_path string
@@ -19,15 +31,25 @@ var (
 	help bool
 )
 
+func printHelp(string) error {
+	log.Println(HELP)
+	os.Exit(0)
+	return nil
+}
 func init() {
-	flag.StringVar(&ssl_full_path, "cf", "", "Path to the full chain SSL certificate")
-	flag.StringVar(&ssl_priv_path, "cp", "", "Path to the private SSL certificate")
-	flag.StringVar(&port, "p", "80", "Application Port")
+	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
-	flag.StringVar(&ssl_full_path, "cert-full", "", "Path to the full chain SSL certificate")
-	flag.StringVar(&ssl_priv_path, "cert-priv", "", "Path to the private SSL certificate")
-	flag.StringVar(&port, "port", "80", "Application Port")
-	flag.Parse()
+	flags.StringVar(&ssl_full_path, "cert-full", "", "Path to the full chain SSL certificate")
+	flags.StringVar(&ssl_full_path, "cf", "", "Path to the full chain SSL certificate")
+	flags.StringVar(&ssl_priv_path, "cert-priv", "", "Path to the private SSL certificate")
+	flags.StringVar(&ssl_priv_path, "cp", "", "Path to the private SSL certificate")
+	flags.StringVar(&port, "port", "80", "Application Port")
+	flags.StringVar(&port, "p", "80", "Application Port")
+
+	flags.Usage = func() {
+		fmt.Println(HELP)
+	}
+	flags.Parse(os.Args[1:])
 }
 
 type Request_type struct {
