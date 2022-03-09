@@ -272,7 +272,7 @@ function showInfo(infoElem, json) {
 }
 
 async function makeDownloadButton(vidElem) {
-	dl_btn = vidElem.getElementsByClassName("download-button").item(0);
+	let dl_btn = vidElem.getElementsByClassName("download-button").item(0);
 	dl_btn.onclick = async () => {
 		old_onclick = dl_btn.onclick;
 		let l_dl_btn = vidElem.getElementsByClassName("download-button").item(0);
