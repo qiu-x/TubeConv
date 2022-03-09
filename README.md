@@ -1,6 +1,11 @@
 <p align="center">
-  <img src="res/logo.png" alt="logo" />
-
+  <picture>
+    <source
+      srcset="res/dark_logo.png"
+      media="(prefers-color-scheme: dark)">
+    <img alt="logo" id="logo" src="res/logo.png">
+  </picture>
+  
   <h3 align="center">Modern YouTube converter, that combines simplicity and effectiveness.</h3>
 
   <br>
