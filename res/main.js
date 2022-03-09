@@ -253,7 +253,9 @@ function showInfo(infoElem, json) {
 	let menus = Array.from(infoElem.getElementsByClassName("scrollmenu"));
 	let menu_info = [
 		json.video_quality.reverse(),
-		json.audio_quality.reverse(),
+		json.audio_quality.sort().map(x => {
+			return x+" k/s";
+		}),
 		["mp4", "webm", "mp3", "ogg"]
 	]
 	for (let i = 0; i < 3; i++) {
@@ -295,7 +297,7 @@ async function downloadVideo(menus, link) {
 		return itm[0];
 	};
 	vid_q = getSel(menus[0].getElementsByClassName("item")).innerText.trim();
-	aud_q = getSel(menus[1].getElementsByClassName("item")).innerText.trim();
+	aud_q = getSel(menus[1].getElementsByClassName("item")).innerText.trim().split(" k/s")[0];
 	fmt = getSel(menus[2].getElementsByClassName("item")).innerText.trim();
 	let req_cont = {
 		request: "download",
