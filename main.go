@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"os/exec"
 )
 
 const HELP = ` Flags:
@@ -37,7 +38,7 @@ func printHelp(string) error {
 	os.Exit(0)
 	return nil
 }
-func init() {
+func initFlags() {
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
 	flags.StringVar(&ssl_full_path, "cert-full", "", "Path to the full chain SSL certificate")
@@ -91,11 +92,13 @@ type SafeMap struct {
 type Download_data struct {
 	Name string
 	File io.ReadCloser
+	Command *exec.Cmd
 }
 
 var Mapa SafeMap
 
 func main() {
+	initFlags()
 	Mapa.Map = make(map[string]Download_data)
 	checkType := http.HandlerFunc(check_request_type)
 	router.HandleFunc("/", simpleHandler("html/index.html"))

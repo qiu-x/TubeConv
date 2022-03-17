@@ -32,7 +32,8 @@ func checklink_request(w http.ResponseWriter, body []byte) {
 		Type string `json:"type"`
 	}
 
-	_, err := url.ParseRequestURI(checklink_req.Link)
+	link := strings.TrimSpace(checklink_req.Link)
+	_, err := url.ParseRequestURI(link)
 	if err != nil {
 		check_link := checklink{"title"}
 		checklink_json, err := json.Marshal(check_link)
@@ -294,7 +295,11 @@ func download_request(w http.ResponseWriter, body []byte) {
 	filename := strings.Join(filename_arr[:len(filename_arr)-1], "") + "." + download_req.Format
 
 	Mapa.Mutex.Lock()
-	Mapa.Map[string(id)] = Download_data{filename, r}
+	if ffmpeg != nil {
+		Mapa.Map[string(id)] = Download_data{filename, r, ffmpeg}
+	}else{
+		Mapa.Map[string(id)] = Download_data{filename, r, download}
+	}
 	Mapa.Mutex.Unlock()
 	down_link := struct {
 		File string `json:"file"`
@@ -322,4 +327,5 @@ func download_link_generator(w http.ResponseWriter, req *http.Request) {
 	buffer := make([]byte, 1024)
 	io.CopyBuffer(w, r.File, buffer)
 	r.File.Close()
+	r.Command.Process.Kill()
 }
