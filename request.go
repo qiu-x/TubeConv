@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"sort"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gorilla/mux"
@@ -206,6 +207,7 @@ func videoinfo_request(w http.ResponseWriter, body []byte) {
 		}
 	}
 
+	sort.Sort(sort.Reverse(sort.Float64Slice(vid_info.Audio_quality))) 
 	vid_info_json, err := json.Marshal(vid_info)
 	if err != nil {
 		err_handle(err)

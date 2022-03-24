@@ -253,7 +253,7 @@ function showInfo(infoElem, json) {
 	let menus = Array.from(infoElem.getElementsByClassName("scrollmenu"));
 	let menu_info = [
 		json.video_quality.reverse(),
-		json.audio_quality.sort().map(x => {
+		json.audio_quality.map(x => {
 			return x+" k/s";
 		}),
 		["mp4", "webm", "mp3", "ogg"]
