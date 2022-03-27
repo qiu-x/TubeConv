@@ -71,10 +71,7 @@ func TestQuery(t *testing.T) {
 
 	tests := make(map[req_template]respond_template)
 	
-	req := req_template{"query", "good grief"}
-	tests[req] = respond_template{"Bastille - Good Grief (Clean Version - Official Music Video)", 
-	"BASTILLEvideos", "https://www.youtube.com/watch?v=hOrbfQpdLKo", "https://i.ytimg.com/vi/hOrbfQpdLKo/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLCLVNMqcLX40_AOmJWixsBn9wWmAQ"}
-	req = req_template{"query", "https://www.youtube.com/watch?v=hOrbfQpdLKo"}
+	req := req_template{"query", "https://www.youtube.com/watch?v=hOrbfQpdLKo"}
 	tests[req] = respond_template{"Bastille - Good Grief (Clean Version - Official Music Video)", 
 	"BASTILLEvideos", "https://www.youtube.com/watch?v=hOrbfQpdLKo", "https://i.ytimg.com/vi/hOrbfQpdLKo/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLCLVNMqcLX40_AOmJWixsBn9wWmAQ"}
 
