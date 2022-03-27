@@ -124,7 +124,7 @@ func TestVideoInfo(t *testing.T) {
 	req := req_template{"video-info", "https://www.youtube.com/watch?v=lTAXnaWMR3s"}
 
 	vid_quality := []string{"none","144p","240p","360p","480p","720p","1080p"}
-	aud_quality := []float64{0,47.596,49.478,65.106,127.08,125.162}
+	aud_quality := []float64{127.08,125.162,65.106,49.478,47.596,0}
 	tests[req] = respond_template{vid_quality, aud_quality} 
 
 	for req, respond := range tests {
