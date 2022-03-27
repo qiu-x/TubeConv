@@ -19,5 +19,11 @@ jobs:
     - name: Build
       run: go build -v
 
+    - name: Update repos
+      run: sudo apt-get update
+
+    - name: Install yt-dlp
+      run: sudo apt-get install -y yt-dlp
+
     - name: Test
       run: go test -v
