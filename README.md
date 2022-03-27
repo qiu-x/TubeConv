@@ -8,7 +8,14 @@
   
   <h3 align="center">Modern YouTube converter, that combines simplicity and effectiveness.</h3>
 
-  <br>
+  <p align="center">
+  <a href="https://github.com/qiu-x/TubeConv/actions">
+    <img align="center" alt="badge" src="https://github.com/qiu-x/TubeConv/actions/workflows/go-tests.yml/badge.svg">
+  </a>
+  <a href="https://github.com/qiu-x/TubeConv/actions">
+    <img align="center" alt="badge" src="https://github.com/qiu-x/TubeConv/actions/workflows/codeql-analysis.yml/badge.svg">
+  </a>
+  </p>
   
   <h2 align="center">How to use it?</h2>
 
