@@ -16,6 +16,14 @@ html, body {
 	user-select: none;
 }
 
+a:link {
+	cursor: pointer;
+}
+
+a:visited {
+	cursor: pointer;
+}
+
 .template { display: none; visibility: hidden; }
 
 .footer {
@@ -376,12 +384,9 @@ html, body {
 	}
 	a:link {
 		color: cyan;
-		cursor: auto;
 	}
-
 	a:visited {
 		color: cyan;
-		cursor: auto;
 	}
 	#search-box {
 		color: #fff;
