@@ -18,11 +18,20 @@ html, body {
 
 .template { display: none; visibility: hidden; }
 
+.footer {
+	margin-left: auto;
+	margin-right: auto;
+	width: auto;
+	text-align: center;
+	max-width: 300px;
+	font-size: 13px;
+}
+
 #main-view {
 	top: 0px;
 	margin-left: auto;
 	margin-right: auto;
-	height: 100%;
+	height: 95%;
 	max-height: 100%;
 	width: 80%;
 	max-width: 800px;
@@ -364,6 +373,15 @@ html, body {
 	html, body {
 		color: #fff;
 		background-color: #000;
+	}
+	a:link {
+		color: cyan;
+		cursor: auto;
+	}
+
+	a:visited {
+		color: cyan;
+		cursor: auto;
 	}
 	#search-box {
 		color: #fff;
