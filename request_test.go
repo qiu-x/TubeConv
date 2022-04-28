@@ -151,7 +151,7 @@ func TestDownload(t *testing.T) {
 		Format        string
 	}
 
-	req := req_template{"download", "https://www.youtube.com/watch?v=lTAXnaWMR3s", "1080p", 360.00, "mp4"}
+	req := req_template{"download", "https://www.youtube.com/watch?v=U3aWAmSpF6E", "1080p", 360.00, "mp4"}
 	Mapa.Map = make(map[string]Download_data)
 
 	r := httptest.NewRecorder()
@@ -172,7 +172,7 @@ func TestDownload(t *testing.T) {
 	download_link_generator(r, request)
 	
 	download := exec.Command("yt-dlp", "-f", "bestvideo[ext=mp4][height<=1080p]+bestaudio[ext=m4a][abr<=360]",
-	"-o", "-", "https://www.youtube.com/watch?v=lTAXnaWMR3s")
+	"-o", "-", "https://www.youtube.com/watch?v=U3aWAmSpF6E")
 	file, err := download.StdoutPipe()
 	if err != nil {
 		err_handle(err)
