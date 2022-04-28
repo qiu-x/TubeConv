@@ -229,44 +229,60 @@ func download_request(w http.ResponseWriter, body []byte) {
 	var r io.ReadCloser
 	var err error
 
-	if download_req.Audio_quality != 0 && download_req.Video_quality != "none" && download_req.Format != "mp3" && download_req.Format != "ogg" {
-		download = exec.Command("yt-dlp", "-f", "bestvideo[ext="+download_req.Format+"][height<="+
-			download_req.Video_quality+"]+bestaudio[ext=m4a][abr<="+
-			strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]",
-			"-o", "-", download_req.Link)
-		r, err = download.StdoutPipe()
-	} else if download_req.Audio_quality != 0 && download_req.Video_quality == "none" || download_req.Format == "mp3" || download_req.Format == "ogg" {
-		if download_req.Format == "webm" {
-			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=webm][abr<="+
-				strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]", "-o", "-", download_req.Link)
-		} else {
-			download = exec.Command("yt-dlp", "-f", "bestaudio[ext=m4a][abr<="+
-				strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64)+"]", "-o", "-", download_req.Link)
-		}
-		if download_req.Format != "mp4" && download_req.Format != "webm" {
-			if download_req.Format == "ogg" {
-				ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "ogg", "-")
-				ffmpeg.Stdin, _ = download.StdoutPipe()
-				r, err = ffmpeg.StdoutPipe()
-			} else {
-				ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "mp3", "-")
-				ffmpeg.Stdin, _ = download.StdoutPipe()
-				r, err = ffmpeg.StdoutPipe()
-			}
-		} else {
-			r, err = download.StdoutPipe()
-		}
-	} else if download_req.Audio_quality == 0 && download_req.Video_quality != "none" {
-		download = exec.Command("yt-dlp", "-f", "bestvideo[ext="+download_req.Format+"][height<="+
-			download_req.Video_quality+"]", "-o", "-", download_req.Link)
-		r, err = download.StdoutPipe()
-	} else {
-		log.Println("Wrong request")
-		return
+	var audio_flag string
+	var video_flag string
+
+	switch {
+	case download_req.Audio_quality != 0:
+		audio_flag = "bestaudio[ext=m4a][abr<=" + strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]"
+		break
+	case download_req.Audio_quality != 0 && download_req.Format == "webm":
+		audio_flag = "bestaudio[ext=webm][abr<=" + strconv.FormatFloat(download_req.Audio_quality, 'f', 0, 64) + "]"
+		break
+	case download_req.Audio_quality == 0:
+		audio_flag = ""
+		break
 	}
+
+	switch {
+	case download_req.Video_quality != "none" && download_req.Format != "mp3" && download_req.Format != "ogg":
+		video_flag = "bestvideo[ext=" + download_req.Format +"][height<="+download_req.Video_quality+"]"
+		break
+	case download_req.Video_quality == "none":
+		video_flag = ""
+		break
+	}
+
+	if len(audio_flag) <= 1 || len(video_flag) <= 1 {
+		download = exec.Command("yt-dlp", "-f", video_flag+audio_flag,
+		"-o", "-", download_req.Link)
+	}else{
+		download = exec.Command("yt-dlp", "-f", video_flag+"+"+audio_flag,
+		"-o", "-", download_req.Link)
+		log.Println("yt-dlp -f" + video_flag+audio_flag + 
+		"-o -" + download_req.Link)
+	}
+
+	switch {
+	case download_req.Format == "ogg":
+		ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "ogg", "-")
+		ffmpeg.Stdin, _ = download.StdoutPipe()
+		r, err = ffmpeg.StdoutPipe()
+		break
+	case download_req.Format == "mp3":
+		ffmpeg = exec.Command("ffmpeg", "-i", "-", "-f", "ogg", "-")
+		ffmpeg.Stdin, _ = download.StdoutPipe()
+		r, err = ffmpeg.StdoutPipe()
+		break
+	default:
+		r, err = download.StdoutPipe()
+		break
+	}
+
 	if err != nil {
 		err_handle(err)
 	}
+
 	download.Start()
 	go func() {
 		download.Process.Wait()
@@ -329,5 +345,6 @@ func download_link_generator(w http.ResponseWriter, req *http.Request) {
 	buffer := make([]byte, 1024)
 	io.CopyBuffer(w, r.File, buffer)
 	r.File.Close()
-	r.Command.Process.Kill()
+	r.Command.Process.Wait()
+	r.Command.Process.Kill()	
 }
