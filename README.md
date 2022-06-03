@@ -43,6 +43,8 @@
   <ul>
     <li>More video/audio formats</li>
     <li>Add proper unit tests</li>
+    <li>Basic video editing</li>
+    <li>Video screenshoting</li>
 
   </ul> 
 
