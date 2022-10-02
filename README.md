@@ -45,7 +45,7 @@
     <li>Add proper unit tests</li>
     <li>Basic video editing</li>
     <li>Video screenshoting</li>
-
+    <li>Short link support (youtu.be)</li>
   </ul> 
 
   
