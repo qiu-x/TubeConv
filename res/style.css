@@ -11,7 +11,6 @@ html, body {
 	-moz-user-select: -moz-none;
 	-khtml-user-select: none;
 	-webkit-user-select: none;
-	
 	-ms-user-select: none;
 	user-select: none;
 }
@@ -33,14 +32,15 @@ a:visited {
 	text-align: center;
 	max-width: 300px;
 	font-size: 13px;
+	height: 30px;
+	padding-top: 10px;
 }
 
 #main-view {
 	top: 0px;
 	margin-left: auto;
 	margin-right: auto;
-	height: 95%;
-	max-height: 100%;
+	min-height: 95%;
 	width: 80%;
 	max-width: 800px;
 }
@@ -140,7 +140,7 @@ a:visited {
 .video .thumb {
 	flex-grow: 0;
 	flex-shrink: 1;
-	object-fit: cover;
+	object-fit: contain;
 	padding: 10px; 
 	font-size: 17px;
 	border: 0px;
@@ -149,6 +149,7 @@ a:visited {
 	height: 90%;
 	margin: 0px;
 	z-index: 1;
+	min-width: 300px;
 }
 
 .video .video-info {
@@ -161,13 +162,15 @@ a:visited {
 	margin: 0;
 	position: relative;
 	padding-right: 10px;
-	top: 22%;
+	padding-top: 3%;
+	transition: max-height 2.0s;
 }
 
 .video .video-info.final {
 	display: none;
 	opacity: 1;
 	top: 0%;
+	padding-top: 0%;
 	z-index: 1;
 	overflow: hidden;
 }
@@ -216,6 +219,7 @@ a:visited {
 
 .video .alt-bg {
 	right: 0px;
+	opacity: 0;
 	margin: 0px;
 	padding: 0px;
 	background: #d00;
@@ -227,7 +231,7 @@ a:visited {
 	position: absolute;
 	z-index: 0;
 	width: 0%;
-	transition: all 1s;
+	transition: width 0.5s;
 }
 
 .video .download-button img {
@@ -255,9 +259,6 @@ a:visited {
 	.video .download-button {
 		width: 45px;
 	}
-	/* .scrollmenu { */
-		/* width: auto !important; */
-	/* } */
 }
 
 @media (max-width: 500px) {
@@ -274,17 +275,22 @@ a:visited {
 		width: 100%;
 		padding: 0px;
 		height: 70%;
+		min-width: none;
+		max-height: 300px;;
 	}
 	.video .video-info {
 		display: inline-block;
 		font-size: 12px;
 		max-width: 100%;
+		width: 100%;
 		padding-bottom: 10px;
-		padding-top: 10px;
-		margin-left: 5px;
+		padding-top: 10px !important;
+		padding-right: 0px !important;
+		margin-left: 0px !important;
+		padding-left: 5px !important;
 		top: 0%;
 		-ms-transform: none;
-		transform: none;
+		transform: all 0.5s;
 	}
 	.video .download-button {
 		display: inline-block;
@@ -294,8 +300,11 @@ a:visited {
 	}
 	.video .video-info.final.showed {
 		display: block;
-		height: 123px !important;
 		transition: all 0.5s;
+		max-height: 500px;
+	}
+	.video .alt-bg {
+		transition: opacity 0.5s;
 	}
 	.scrollmenu {
 		display: block !important;
@@ -311,17 +320,17 @@ a:visited {
 		display: inline-block !important;
 	}
 	.resp-spinner {
-		top: 10px !important;
-		height: 6vh !important;
-		width: 6vh !important;
+		height: 4vh !important;
+		width: 4vh !important;
+		border: 5px solid #EAF0F6 !important;
+		border-top: 5px solid #d00 !important;
 	}
 }
 
 .loader {
 	display: none;
 	opacity: 0;
-	margin: auto;
-	margin-top: 60px;
+	margin-top: 150px;
 	border: 10px solid #EAF0F6;
 	border-radius: 50%;
 	border-top: 10px solid #d00;
@@ -329,13 +338,13 @@ a:visited {
 	height: 10vh;
 	animation: spinner 4s linear infinite;
 	position: relative;
-	top:35%;
+	top: 50%;
 	transition: left 0s, visibility 0s, opacity 0.5s;
 }
 
 @keyframes spinner {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
+	0% { transform: translateY(-50%) rotate(0deg); }
+	100% { transform: translateY(-50%) rotate(360deg); }
 }
 
 .scrollmenu .item {
@@ -374,7 +383,7 @@ a:visited {
 	display: table-cell;
 	vertical-align: middle;
 	margin: auto;
-	transition: all 0.5s;
+	transition: width 0.3s ease-in-out;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -60,16 +60,31 @@ type Request_type struct {
 
 var router = mux.NewRouter()
 
-func simpleHandler(filepath string) func(http.ResponseWriter, *http.Request) {
-	htmlRaw, err := ioutil.ReadFile(filepath)
-	if err != nil {
+func simpleHandler(filepath string, reload bool) func(http.ResponseWriter, *http.Request) {
+	var htmlRaw []byte
+	var err error
+	if !reload {
+		htmlRaw, err = ioutil.ReadFile(filepath)
+	}
+	if err != nil && !reload {
 		log.Fatal(err)
 		return func(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 		}
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write(htmlRaw)
+	if !reload {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Write(htmlRaw)
+		}
+	} else {
+		return func(w http.ResponseWriter, r *http.Request) {
+			htmlRaw, err = ioutil.ReadFile(filepath)
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			w.Write(htmlRaw)
+		}
 	}
 }
 
@@ -101,7 +116,7 @@ func main() {
 	initFlags()
 	Mapa.Map = make(map[string]Download_data)
 	checkType := http.HandlerFunc(check_request_type)
-	router.HandleFunc("/", simpleHandler("html/index.html"))
+	router.HandleFunc("/", simpleHandler("html/index.html", false))
 	router.HandleFunc("/req", checkType).Methods("POST")
 	router.HandleFunc("/download/{id}", download_link_generator)
 	http.Handle("/", router)

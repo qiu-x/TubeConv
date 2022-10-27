@@ -34,7 +34,6 @@ function spinner(show, func) {
 function makeLocalSpinner() {
 	let spn_clone = document.getElementById("spinner").cloneNode(true);
 	spn_clone.style.position = "absolute";
-	spn_clone.style.top = "0px";
 	spn_clone.style.marginTop = "0px";
 	spn_clone.style.marginLeft = "auto";
 	spn_clone.style.marginRight = "auto";
@@ -151,8 +150,16 @@ async function queryVideoByLink(link) {
 	vid.id = "video";
 	vid.classList.remove("template");
 	vid.classList.add("video");
-	vid.getElementsByClassName("thumb").item(0).src = "https://i.ytimg.com/vi/" +
-		link.split("=")[1] + "/hqdefault.jpg";
+	if (link.substring(0, 8) == "youtu.be") {
+		vid.getElementsByClassName("thumb").item(0).src = "https://i.ytimg.com/vi/" +
+			link.split("/")[1] + "/hqdefault.jpg";
+	} else if (link.substring(0, 16) == "https://youtu.be") {
+		vid.getElementsByClassName("thumb").item(0).src = "https://i.ytimg.com/vi/" +
+			link.split("/")[3] + "/hqdefault.jpg";
+	} else {
+		vid.getElementsByClassName("thumb").item(0).src = "https://i.ytimg.com/vi/" +
+			link.split("=")[1] + "/hqdefault.jpg";
+	}
 	let dl_button = vid.getElementsByClassName("download-button").item(0);
 	dl_button.id = link;
 	dl_button.onclick = () => {videoInfo(0, link);};
@@ -195,6 +202,7 @@ async function videoInfo(element, link) {
 	// Animate background
 	let bg = elem.getElementsByClassName("alt-bg").item(0)
 	bg.style.width = "100%";
+	bg.style.opacity = 1;
 	let dl_button = elem.getElementsByClassName("download-button").item(0);
 	dl_button.classList.add("final")
 	let arrow = dl_button.getElementsByTagName("img").item(0);
@@ -216,7 +224,9 @@ async function videoInfo(element, link) {
 	const template = document.getElementById("video-template");
 	const json_videos = json.videos;
 
-	spn.hide(() => showInfo(info,json));
+	let old_h = getComputedStyle(info).height;
+
+	spn.hide(() => showInfo(info, json, old_h));
 
 	makeDownloadButton(elem);
 }
@@ -229,20 +239,27 @@ function selItem(item) {
 	item.classList.add("selected")
 }
 
-function showInfo(infoElem, json) {
-	// Store the current element height
-	let old_h = getComputedStyle(infoElem).height;
-	infoElem.style.height = old_h;
+function showInfo(infoElem, json, old_h) {
 	// Load element template
 	infoElem.innerHTML = document.getElementById("video-info-temp").innerHTML;
-	// Restore the old height (makes the animation work)
 	infoElem.style.opacity = 0;
+	infoElem.style.maxHeight = old_h;
+	window.setTimeout(function() {
+		infoElem.style.maxHeight = "300px";
+	},1);
 
 	// Helper function for filling the menu items
 	let assign_text = (menu, arr) => {
 		let item_empty = menu.getElementsByClassName("item").item(0);
 		for (let i = 0; i < arr.length; i++) {
 			let item = item_empty.cloneNode(true);
+			if (i == 0) {
+				item.style.backgroundColor = "#0000004a";
+				item.onclick = null;
+			}
+			if (i == 1) {
+				item.classList.add("selected")
+			}
 			item.innerText = arr[i];
 			menu.appendChild(item);
 		}
@@ -251,13 +268,15 @@ function showInfo(infoElem, json) {
 
 	// Fill the menus
 	let menus = Array.from(infoElem.getElementsByClassName("scrollmenu"));
+	json.video_quality.push("Video");
 	let menu_info = [
 		json.video_quality.reverse(),
 		json.audio_quality.map(x => {
 			return x+" k/s";
 		}),
-		["mp4", "webm", "mp3", "ogg"]
+		["Format", "mp4", "webm", "mp3", "ogg"]
 	]
+	menu_info[1].unshift("Audio");
 	for (let i = 0; i < 3; i++) {
 		assign_text(menus[i], menu_info[i]);
 	}
