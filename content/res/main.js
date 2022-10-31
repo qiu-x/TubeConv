@@ -2,8 +2,45 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function post(url, data) {
-	return fetch(url, {method: "POST", redirect: "follow", body: JSON.stringify(data)})
+GlobalTimeout = 200000 // 20sec
+
+// POST request wrapper
+async function post(url, ms, data) {
+	const controller = new AbortController()
+	const signal = controller.signal;
+	const promise = fetch(url, { signal: signal, method: "POST", redirect: "follow", body: JSON.stringify(data)});
+	if (signal) signal.addEventListener("abort", () => controller.abort());
+	const timeout = setTimeout(() => controller.abort(), ms);
+	return await promise.finally(() => clearTimeout(timeout));
+}
+
+async function ApiCall(req) {
+	let resp;
+	try {
+		resp = await post("/req", GlobalTimeout, req);
+	} catch (err) {
+		if (err.name === "AbortError") {
+			alert("Request timed out.");
+		} else if (err.message === "NetworkError when attempting to fetch resource.") {
+			alert("Error: Server does not respond. Please check your internet connection.");
+		} else if (err.name === "TypeError") {
+			alert("AbortSignal.timeout() method is not supported");
+		} else {
+			// A network error, or some other problem.
+			alert("Error: Server does not respond. Please check your internet connection.");
+		}
+		return err
+	}
+	if (!resp.ok) {
+		let msg;
+		if (resp.status == 429) {
+			msg = "Request limit exceeded. Please wait for a moment.";
+		} else {
+			msg = `Error: ${resp.status}`;
+		}
+		return Error(msg);
+	}
+	return resp
 }
 
 function log(text) {
@@ -13,6 +50,12 @@ function log(text) {
 	} else {
 		console.log("main: ", text)
 	}
+}
+
+function removeListeners(elem) {
+	const oldElement = elem
+	const newElement = elem.cloneNode(true);
+	oldElement.parentNode.replaceChild(newElement, oldElement);
 }
 
 function spinner(show, func) {
@@ -27,36 +70,40 @@ function spinner(show, func) {
 		spinner.addEventListener("transitionend", () => {
 			spinner.style.display = "none";
 			if (func) func();
-		});
+		}, {once: true});
 	}
 }
 
-function makeLocalSpinner() {
+function newSpinner() {
 	let spn_clone = document.getElementById("spinner").cloneNode(true);
-	spn_clone.style.position = "absolute";
-	spn_clone.style.marginTop = "0px";
-	spn_clone.style.marginLeft = "auto";
-	spn_clone.style.marginRight = "auto";
-	spn_clone.style.left = "0px";
-	spn_clone.style.right = "0px";
-	spn_clone.style.zIndex = 1;
+	[
+		["position", "absolute"],
+		["marginTop", "0px"],
+		["marginLeft", "auto"],
+		["marginRight", "auto"],
+		["left", "0px"],
+		["right", "0px"],
+		["zIndex", 1]
+	].map(v => {
+		spn_clone.style[v[0]] = v[1];
+	});
 	spn_clone.classList.add("resp-spinner");
 	let spn = {
-		spinner: spn_clone,
+		elem: spn_clone,
 		show: function() {
-			let spi = this.spinner;
+			let spi = this.elem;
 			spi.style.display = "inline-block";
 			window.setTimeout(function(){
 				spi.style.opacity = 1;
 			},0);
 		},
 		hide: function(func) {
-			let spi = this.spinner;
+			let spi = this.elem;
 			spi.style.opacity = 0;
 			spi.addEventListener("transitionend", () => {
 				spi.style.display = "none";
 				if (func) func();
-			});
+			}, {once: true});
 		}
 	}
 	return spn;
@@ -74,19 +121,26 @@ document.getElementById("search-input").addEventListener("keydown", event => {
 });
 
 async function searchFunc() {
+	let spn = document.getElementById("spinner");
+	removeListeners(spn);
 	txt = document.getElementById("search-input").value;
 	if (txt == "") {
 		return
 	}
 	document.activeElement.blur();
 	await clearResoult();
-	await checkLink(txt);
-	await showResoult();
+	ok = await checkLink(txt);
+	if (!ok) {
+		// window.location.reload();
+		spinner(false);
+		return;
+	}
+	await showResult();
 }
 
-async function showResoult() {
+async function showResult() {
 	let search = document.getElementById("search");
-	if (!showResoult.transformed) {
+	if (!showResult.transformed) {
 		search.style.transition = "margin-top 1s";
 		search.style.marginTop = 0;
 	}
@@ -100,12 +154,12 @@ async function showResoult() {
 			vids[i].style.opacity = 1;
 		}
 	})}
-	if (!showResoult.transformed) {
-		search.addEventListener("transitionend", show);
+	if (!showResult.transformed) {
+		search.addEventListener("transitionend", show, {once: true});
 	} else {
-		vids.item(0).addEventListener("transitionend", show);
+		vids.item(0).addEventListener("transitionend", show, {once: true});
 	}
-	showResoult.transformed = true;
+	showResult.transformed = true;
 }
 
 async function clearResoult() {
@@ -122,26 +176,35 @@ async function clearResoult() {
 	vids.item(0).addEventListener("transitionend", () => {
 		arr.map(x => x.remove())
 		spinner(true);
-	});
+	},{once: true});
 }
 
 async function checkLink(txt) {
-	const resp = await post("/req", {
+	let resp = await ApiCall({
 		request: "check-link",
 		link: txt
 	});
+	if (resp instanceof Error) {
+		return false;
+	}
+	let ok;
 	const json = await resp.json();
 	switch(json.type) {
 	case "title":
-		await queryVideo(txt);
+		ok = await queryVideo(txt);
 		break;
 	case "link":
-		queryVideoByLink(txt);
+		ok = await queryVideoByLink(txt);
 		break;
 	default:
 		log("bad response")
+		return false;
 		break;
 	}
+	if (!ok) {
+		return false;
+	}
+	return true;
 }
 
 async function queryVideoByLink(link) {
@@ -165,17 +228,20 @@ async function queryVideoByLink(link) {
 	dl_button.onclick = () => {videoInfo(0, link);};
 	document.getElementById("main-view").appendChild(vid);
 	videoInfo(vid, link);
+	return true;
 }
 
 async function queryVideo(title) {
-	const resp = await post("/req", {
+	let resp = await ApiCall({
 		request: "query",
 		text: title
 	});
+	if (resp instanceof Error) {
+		return false;
+	}
 	const json = await resp.json();
 	const template = document.getElementById("video-template");
 	const json_videos = json.videos;
-	log(json);
 	for (let i = 0; i < json_videos.length; i++) {
 		let vid = template.cloneNode(true);
 		vid.id = "video";
@@ -194,6 +260,7 @@ async function queryVideo(title) {
 		dl_button.id = json_videos[i].link;
 		document.getElementById("main-view").appendChild(vid);
 	}
+	return true;
 }
 
 async function videoInfo(element, link) {
@@ -211,15 +278,19 @@ async function videoInfo(element, link) {
 	let info = elem.querySelector(".video-info")
 
 	// Make spinner
-	let spn = makeLocalSpinner();
-	info.appendChild(spn.spinner);
-	bg.addEventListener("transitionend", () => spn.show());
+	let spn = newSpinner();
+	info.appendChild(spn.elem);
+	bg.addEventListener("transitionend", () => spn.show(), {once: true});
 
 	// Send request
-	const resp = await post("/req", {
+	let resp = await ApiCall({
 		request: "video-info",
 		link: link
 	});
+	if (resp instanceof Error) {
+		window.location.reload();
+		return false;
+	}
 	const json = await resp.json();
 	const template = document.getElementById("video-template");
 	const json_videos = json.videos;
@@ -228,7 +299,7 @@ async function videoInfo(element, link) {
 
 	spn.hide(() => showInfo(info, json, old_h));
 
-	makeDownloadButton(elem);
+	newDownloadButton(elem);
 }
 
 function selItem(item) {
@@ -292,7 +363,7 @@ function showInfo(infoElem, json, old_h) {
 	},0);
 }
 
-async function makeDownloadButton(vidElem) {
+async function newDownloadButton(vidElem) {
 	let dl_btn = vidElem.getElementsByClassName("download-button").item(0);
 	dl_btn.onclick = async () => {
 		old_onclick = dl_btn.onclick;
@@ -325,7 +396,10 @@ async function downloadVideo(menus, link) {
 	}
 	req_cont["video-quality"] = String(vid_q);
 	req_cont["audio-quality"] = Number(+(aud_q));
-	const resp = await post("/req", req_cont);
+	let resp = await ApiCall(req_cont);
+	if (resp instanceof Error) {
+		return false;
+	}
 	const json = await resp.json();
 	window.location = json.file;
 }

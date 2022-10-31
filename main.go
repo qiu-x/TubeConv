@@ -10,9 +10,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"sync"
-	"os/exec"
 )
 
 const HELP = ` Flags:
@@ -23,8 +23,7 @@ const HELP = ` Flags:
 --cert-priv, -cp
         Path to the private SSL certificate
 --help, -h
-        Print this message
-`
+        Print this message`
 
 var (
 	port          string
@@ -38,6 +37,7 @@ func printHelp(string) error {
 	os.Exit(0)
 	return nil
 }
+
 func initFlags() {
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
@@ -51,7 +51,10 @@ func initFlags() {
 	flags.Usage = func() {
 		fmt.Println(HELP)
 	}
-	flags.Parse(os.Args[1:])
+	err := flags.Parse(os.Args[1:])
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 type Request_type struct {
@@ -83,7 +86,11 @@ func simpleHandler(filepath string, reload bool) func(http.ResponseWriter, *http
 				http.NotFound(w, r)
 				return
 			}
-			w.Write(htmlRaw)
+			_, err := w.Write(htmlRaw)
+			if err != nil {
+				log.Fatalln(err)
+				return
+			}
 		}
 	}
 }
@@ -105,8 +112,8 @@ type SafeMap struct {
 }
 
 type Download_data struct {
-	Name string
-	File io.ReadCloser
+	Name    string
+	File    io.ReadCloser
 	Command *exec.Cmd
 }
 
@@ -116,12 +123,12 @@ func main() {
 	initFlags()
 	Mapa.Map = make(map[string]Download_data)
 	checkType := http.HandlerFunc(check_request_type)
-	router.HandleFunc("/", simpleHandler("html/index.html", false))
+	router.HandleFunc("/", simpleHandler("content/html/index.html", false))
 	router.HandleFunc("/req", checkType).Methods("POST")
 	router.HandleFunc("/download/{id}", download_link_generator)
 	http.Handle("/", router)
-	fs := http.FileServer(http.Dir("."))
-	http.Handle("/res/", fileServerFilter(fs))
+	fs := http.FileServer(http.Dir("./content/res"))
+	http.Handle("/res/", http.StripPrefix("/res/", fs))
 	log.Println("Listening on port: ", port)
 	var err error
 	if len(ssl_full_path) != 0 && len(ssl_priv_path) != 0 {
