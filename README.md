@@ -1,9 +1,9 @@
 <p align="center">
   <picture>
     <source
-      srcset="res/dark_logo.png"
+      srcset="content/res/dark_logo.png"
       media="(prefers-color-scheme: dark)">
-    <img alt="logo" id="logo" src="res/logo.png">
+    <img alt="logo" id="logo" src="content/res/logo.png">
   </picture>
   
   <h3 align="center">Modern YouTube converter, that combines simplicity and effectiveness.</h3>
@@ -20,16 +20,16 @@
   <h2 align="center">How to use it?</h2>
 
   <h3 align="center">Go to <a href="https://tubeconv.com" target="_blank">TubeConv.com</a><h3>
-  <img width="1012px" src="res/readme/1.png" alt="first step" />
+  <img width="1012px" src=".readme/1.png" alt="first step" />
   
   <h3 align="center">Paste a link to a video, or use the search bar<h3>
-  <img width="1012px" src="res/readme/2.png" alt="second step" />
+  <img width="1012px" src=".readme/2.png" alt="second step" />
   
   <h3 align="center">Choose the quality and video/audio format that suits you (by default the best quality is selected)<h3>
-  <img width="1012px" src="res/readme/3.png" alt="third step" />
+  <img width="1012px" src=".readme/3.png" alt="third step" />
     
   <h3 align="center">Click the download button!</h3>
-  <img width="1012px" src="res/readme/4.png" alt="fourth step" />
+  <img width="1012px" src=".readme/4.png" alt="fourth step" />
     
   <br>
     
